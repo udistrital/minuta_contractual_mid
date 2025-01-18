@@ -12,6 +12,12 @@ API MID para generación de Minuta
 
 ### Variables de Entorno
 ```shell
+GESTION_CONTRACTUAL_CRUD
+GESTION_CONTRACTUAL_MID
+CLAUSULAS_PARAGRAFOS_CRUD
+PLANTILLAS_MID
+PROVEEDORES_MID
+ORDENADORES_SUPERVISORES_CONTRATACION_MID
 PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
