@@ -9,71 +9,28 @@ paths:
           description: ''
       tags:
         - App
-  /minuta:
+  /minutas/contratos/{id}:
     post:
-      operationId: MinutaController_create
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateMinutaDto'
+      operationId: MinutaController_obtenerMinuta
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Id del contrato general
+          schema:
+            type: number
       responses:
-        '201':
-          description: ''
-      tags: &ref_0
+        '200':
+          description: Solicitud procesada correctamente
+        '400':
+          description: Solicitud incorrecta
+        '404':
+          description: Recurso no encontrado
+        '500':
+          description: Error interno del servidor
+      summary: Generación de minuta en PDF (base64)
+      tags:
         - Minuta
-    get:
-      operationId: MinutaController_findAll
-      parameters: []
-      responses:
-        '200':
-          description: ''
-      tags: *ref_0
-  /minuta/{id}:
-    get:
-      operationId: MinutaController_findOne
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-      tags: *ref_0
-    patch:
-      operationId: MinutaController_update
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateMinutaDto'
-      responses:
-        '200':
-          description: ''
-      tags: *ref_0
-    delete:
-      operationId: MinutaController_remove
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-      tags: *ref_0
 info:
   title: Minuta Contractual MID
   description: API
@@ -84,10 +41,4 @@ tags:
     description: ''
 servers: []
 components:
-  schemas:
-    CreateMinutaDto:
-      type: object
-      properties: {}
-    UpdateMinutaDto:
-      type: object
-      properties: {}
+  schemas: {}
