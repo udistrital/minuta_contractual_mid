@@ -1,8 +1,4 @@
-FROM node:current-alpine
-RUN apk update && apk add bash
-RUN apk add python3
-RUN apk add py3-pip
-RUN apk add aws-cli
+FROM sleavely/node-awscli:18.x
 
 WORKDIR /
 COPY dist dist
