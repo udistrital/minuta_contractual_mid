@@ -54,8 +54,6 @@ export class MinutaService {
         clausulas,
       });
 
-      console.log(datosIniciales);
-
       const html = await this.renderizarHTML(plantilla_id, datosIniciales);
 
       // Datos finales
@@ -218,7 +216,7 @@ export class MinutaService {
         'GESTION_CONTRACTUAL_CRUD',
       );
 
-      const url = `${urlGestionContractualCrud}/contratos-generales/${idContrato}`;
+      const url = `${urlGestionContractualCrud}contratos-generales/${idContrato}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -238,7 +236,7 @@ export class MinutaService {
         'GESTION_CONTRACTUAL_MID',
       );
 
-      const url = `${urlGestionContractualMid}/contratos-generales/${idContrato}`;
+      const url = `${urlGestionContractualMid}contratos-generales/${idContrato}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -258,7 +256,7 @@ export class MinutaService {
         'GESTION_CONTRACTUAL_CRUD',
       );
 
-      const url = `${urlGestionContractualCrud}/contratistas/contrato/${idContrato}`;
+      const url = `${urlGestionContractualCrud}contratistas/contrato/${idContrato}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -277,7 +275,7 @@ export class MinutaService {
       const urlProveedoresMid: string =
         this.configService.get<string>('PROVEEDORES_MID');
 
-      const url = `${urlProveedoresMid}/contratistas?id=${documentoContratista}`;
+      const url = `${urlProveedoresMid}contratistas?id=${documentoContratista}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -297,7 +295,7 @@ export class MinutaService {
         'GESTION_CONTRACTUAL_CRUD',
       );
 
-      const url = `${urlGestionContractualCrud}/ordenador-contrato/contrato/${idContrato}`;
+      const url = `${urlGestionContractualCrud}ordenador-contrato/contrato/${idContrato}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -318,7 +316,7 @@ export class MinutaService {
           'ORDENADORES_SUPERVISORES_CONTRATACION_MID',
         );
 
-      const url = `${urlOrdenadoresSupervisoresMId}/ordenadores/${idArgo}`;
+      const url = `${urlOrdenadoresSupervisoresMId}ordenadores/${idArgo}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -338,7 +336,7 @@ export class MinutaService {
         'CLAUSULAS_PARAGRAFOS_CRUD',
       );
 
-      const url = `${urlClausulasParagrafosCrud}/contratos/${idContrato}`;
+      const url = `${urlClausulasParagrafosCrud}contratos/${idContrato}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -378,7 +376,7 @@ export class MinutaService {
         'GESTION_CONTRACTUAL_CRUD',
       );
 
-      const url = `${urlGestionContractualCrud}/especificaciones-tecnicas?limit=0&query={"activo":true,"contrato_general_id":${idContrato}}`;
+      const url = `${urlGestionContractualCrud}especificaciones-tecnicas?limit=0&query={"activo":true,"contrato_general_id":${idContrato}}`;
       const { data } = await axios.get<any>(url);
 
       if (!data.Success || data.Status != '200') {
@@ -396,7 +394,8 @@ export class MinutaService {
     try {
       const urlPlantillasMid: string =
         this.configService.get<string>('PLANTILLAS_MID');
-      const url = `${urlPlantillasMid}/plantilla/renderizar-html`;
+
+      const url = `${urlPlantillasMid}plantilla/renderizar-html`;
       const { data } = await axios.post<any>(url, { plantilla_id, datos });
 
       if (!data.Success || data.Status != '200') {
@@ -415,7 +414,7 @@ export class MinutaService {
       const urlPlantillasMid: string =
         this.configService.get<string>('PLANTILLAS_MID');
 
-      const url = `${urlPlantillasMid}/plantilla/renderizar-pdf`;
+      const url = `${urlPlantillasMid}plantilla/renderizar-pdf`;
       const { data } = await axios.post<any>(url, { datos, html });
 
       if (!data.Success || data.Status != '200') {
