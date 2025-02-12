@@ -8,15 +8,34 @@ import axios from 'axios';
 export class MinutaService {
   constructor(private configService: ConfigService) {}
 
+  // Realiza una solicitud GET
+  private async fetchData(url: string): Promise<any> {
+    try {
+      const { data } = await axios.get(url);
+      if (!data.Success || data.Status !== 200) return null;
+      return data.Data;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  // Enviar una solicitud POST
+  private async postData(url: string, body: any): Promise<any> {
+    try {
+      const { data } = await axios.post(url, body);
+      if (!data.Success || data.Status !== '200') return null;
+      return data.Data;
+    } catch (error) {
+      return null;
+    }
+  }
+
   // Función general para el procesamiento de la minuta
   async obtenerMinuta(idContrato: number) {
     try {
       // Contrato general
-      const [contratoCrud, contratoMid] = await Promise.all([
-        this.obtenerContratoGeneralCrud(idContrato),
-        this.obtenerContratoGeneralMid(idContrato),
-      ]);
-      if (!contratoCrud || !contratoMid) {
+      const contratoMid = await this.obtenerContratoGeneralMid(idContrato);
+      if (!contratoMid) {
         return {
           Success: false,
           Status: HttpStatus.NOT_FOUND,
@@ -25,7 +44,7 @@ export class MinutaService {
       }
 
       // Plantilla
-      const plantilla_id = this.obtenerIdPlantilla(contratoCrud);
+      const plantilla_id = this.obtenerIdPlantilla(contratoMid);
       if (!plantilla_id) {
         return {
           Success: false,
@@ -35,16 +54,18 @@ export class MinutaService {
       }
 
       // Datos iniciales
-      const [documentoProveedor, ordenadorArgoId, clausulas] =
+      const [documentoProveedor, ordenadorArgoId, clausulas, especificaciones] =
         await Promise.all([
           this.obtenerDocumento(idContrato),
           this.obtenerOrdenadorArgoId(idContrato),
-          this.obtenerPlantillaClausulas(idContrato),
+          this.obtenerPlantillaClausulas(9512),
+          this.obtenerEspecificaciones(contratoMid),
         ]);
-      const contratista = await this.obtenerContratista(documentoProveedor);
-      const ordenador = await this.obtenerOrdenador(ordenadorArgoId);
+      const [contratista, ordenador] = await Promise.all([
+        this.obtenerContratista(documentoProveedor),
+        this.obtenerOrdenador(ordenadorArgoId),
+      ]);
       const amparos = contratoMid.aplica_poliza ? this.obtenerAmparos() : null;
-      const especificaciones = await this.obtenerEspecificaciones(contratoCrud);
       const datosIniciales = await this.obtenerDatosIniciales({
         contratoMid,
         contratista,
@@ -55,7 +76,7 @@ export class MinutaService {
       });
 
       console.log(datosIniciales);
-
+      
       const html = await this.renderizarHTML(plantilla_id, datosIniciales);
 
       // Datos finales
@@ -84,13 +105,13 @@ export class MinutaService {
   }
 
   // Asignación de datos iniciales
-  async obtenerDatosIniciales(data: any) {
+  private async obtenerDatosIniciales(data: any) {
     // Desestructuración
     const {
       vigencia,
-      modalidad_seleccion_id,
+      modalidad_seleccion,
       fecha_suscripcion_estudios,
-      perfil_contratista_id,
+      perfil_contratista,
     } = data.contratoMid || {};
 
     const { proveedor, representante } = data.contratista || {};
@@ -123,9 +144,9 @@ export class MinutaService {
       contratista_numero_documento: numero_documento || 'XXXXXXX',
       contratista_lugar_exp: ciudad_expedicion_documento || 'XXXXXXX',
       justificacion: 'XXXXXXX', // Valor faltante
-      modalidad_seleccion_tipo: modalidad_seleccion_id || 'XXXXXXX',
+      modalidad_seleccion_tipo: modalidad_seleccion || 'XXXXXXX',
       fecha_suscripcion_estudios: fecha_suscripcion_estudios || 'XXXXXXX',
-      perfil_profesional: this.esPerfilProfesional(perfil_contratista_id),
+      perfil_profesional: this.esPerfilProfesional(perfil_contratista),
     };
 
     if (representante) {
@@ -149,26 +170,24 @@ export class MinutaService {
   }
 
   // Plantilla por unidad ejecutora y tipo de contrato
-  obtenerIdPlantilla(contrato: any) {
-    const unidadEjecutoraId = contrato.unidad_ejecutora_id;
-    const tipoContratoId = contrato.tipo_contrato_id;
-    return plantillas?.[unidadEjecutoraId]?.[tipoContratoId];
+  private obtenerIdPlantilla(contrato: any) {
+    const { unidad_ejecutora_id, tipo_contrato_id } = contrato;
+    return plantillas?.[unidad_ejecutora_id]?.[tipo_contrato_id];
   }
 
   // Identificar si un perfil es profesional o no
-  esPerfilProfesional(perfilContratista: string): boolean {
+  private esPerfilProfesional(perfilContratista: string): boolean {
     const perfilesProfesionales = ['Profesional', 'Asesor'];
     if (perfilContratista) {
       return perfilesProfesionales.some((perfilProfesional) =>
         perfilContratista.includes(perfilProfesional),
       );
-    } else {
-      return false;
     }
+    return false;
   }
 
   // Formatear número a moneda colombiana
-  formatearAPesosColombianos(value: number): string {
+  private formatearAPesosColombianos(value: number): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
@@ -177,9 +196,23 @@ export class MinutaService {
     }).format(value);
   }
 
+  // Especificaciones con valores formateados (si aplica)
+  private async obtenerEspecificaciones(contrato: any) {
+    const tiposContrato = [
+      environment.TIPOS_DE_CONTRATO.ORDEN_DE_COMPRA,
+      environment.TIPOS_DE_CONTRATO.ORDEN_DE_SERVICIO,
+    ];
+    if (tiposContrato.includes(contrato.tipo_contrato_id)) {
+      const especificacionesTecnicas =
+        await this.obtenerEspecificacionesTecnicas(contrato.id);
+      return this.formatearEspecificaciones(especificacionesTecnicas);
+    }
+    return null;
+  }
+
   // Formatear y obtener valores de reemplazo de las especificaciones
-  formatearEspecificaciones(especificaciones: any) {
-    return especificaciones.map((especificacion) => ({
+  private formatearEspecificaciones(especificaciones: any) {
+    return especificaciones.map((especificacion: any) => ({
       descripcion: especificacion.descripcion,
       cantidad: especificacion.cantidad,
       valor_unitario: this.formatearAPesosColombianos(
@@ -190,7 +223,7 @@ export class MinutaService {
   }
 
   // Información del representante
-  obtenerRepresentante(representante: any) {
+  private obtenerRepresentante(representante: any) {
     // Desestructuración
     const {
       primer_nombre,
@@ -211,220 +244,66 @@ export class MinutaService {
     };
   }
 
-  // Información de un contrato general por su id (strings)
-  async obtenerContratoGeneralCrud(idContrato: number): Promise<any> {
-    try {
-      const urlGestionContractualCrud: string = this.configService.get<string>(
-        'GESTION_CONTRACTUAL_CRUD',
-      );
-
-      const url = `${urlGestionContractualCrud}/contratos-generales/${idContrato}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  // Información de un contrato general por su id (id's)
-  async obtenerContratoGeneralMid(idContrato: number): Promise<any> {
-    try {
-      const urlGestionContractualMid: string = this.configService.get<string>(
-        'GESTION_CONTRACTUAL_MID',
-      );
-
-      const url = `${urlGestionContractualMid}/contratos-generales/${idContrato}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  // Información de un contrato general por su id (id's y valores)
+  private async obtenerContratoGeneralMid(idContrato: number): Promise<any> {
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_MID')}contratos-generales/${idContrato}?ids=true`;    
+    return this.fetchData(url);
   }
 
   // Número de documento del contratista asociado a un contrato general
-  async obtenerDocumento(idContrato: number): Promise<any> {
-    try {
-      const urlGestionContractualCrud: string = this.configService.get<string>(
-        'GESTION_CONTRACTUAL_CRUD',
-      );
-
-      const url = `${urlGestionContractualCrud}/contratistas/contrato/${idContrato}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data?.numero_documento;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerDocumento(idContrato: number): Promise<any> {
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}contratistas/contrato/${idContrato}`;
+    const data = await this.fetchData(url);
+    return data?.numero_documento;
   }
 
   // Información del contratista (Persona natural) o contratista y representante (Persona juridica)
-  async obtenerContratista(documentoContratista: number) {
-    try {
-      const urlProveedoresMid: string =
-        this.configService.get<string>('PROVEEDORES_MID');
-
-      const url = `${urlProveedoresMid}/contratistas?id=${documentoContratista}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerContratista(documentoContratista: number) {
+    const url = `${this.configService.get<string>('PROVEEDORES_MID')}contratistas?id=${documentoContratista}`;
+    return this.fetchData(url);
   }
 
   // Id de argo del ordenador asociado a un contrato general
-  async obtenerOrdenadorArgoId(idContrato: number) {
-    try {
-      const urlGestionContractualCrud: string = this.configService.get<string>(
-        'GESTION_CONTRACTUAL_CRUD',
-      );
-
-      const url = `${urlGestionContractualCrud}/ordenador-contrato/contrato/${idContrato}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data?.ordenador_argo_id;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerOrdenadorArgoId(idContrato: number) {
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}ordenador-contrato/contrato/${idContrato}`;
+    const data = await this.fetchData(url);
+    return data?.ordenador_argo_id;
   }
 
   // Información del ordenador (Argo)
-  async obtenerOrdenador(idArgo: number) {
-    try {
-      const urlOrdenadoresSupervisoresMId: string =
-        this.configService.get<string>(
-          'ORDENADORES_SUPERVISORES_CONTRATACION_MID',
-        );
-
-      const url = `${urlOrdenadoresSupervisoresMId}/ordenadores/${idArgo}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerOrdenador(idArgo: number) {
+    const url = `${this.configService.get<string>('ORDENADORES_SUPERVISORES_CONTRATACION_MID')}ordenadores/${idArgo}`;
+    return this.fetchData(url);
   }
 
   // Clausulas asociadas al id de un contrato general (contiene variables {{}} a reemplazar)
-  async obtenerPlantillaClausulas(idContrato: number) {
-    try {
-      const urlClausulasParagrafosCrud: string = this.configService.get<string>(
-        'CLAUSULAS_PARAGRAFOS_CRUD',
-      );
-
-      const url = `${urlClausulasParagrafosCrud}/contratos/${idContrato}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerPlantillaClausulas(idContrato: number) {
+    const url = `${this.configService.get<string>('CLAUSULAS_PARAGRAFOS_CRUD')}contratos/${idContrato}`;
+    return this.fetchData(url);
   }
 
   // Lista de amparos
   // X -> Petición para obtener lista de amparos
-  obtenerAmparos() {
+  private obtenerAmparos() {
     return [];
   }
 
-  // Especificaciones con valores formateados (si aplica)
-  async obtenerEspecificaciones(contrato: any) {
-    const tiposContrato = [
-      environment.TIPOS_DE_CONTRATO.ORDEN_DE_COMPRA,
-      environment.TIPOS_DE_CONTRATO.ORDEN_DE_SERVICIO,
-    ];
-    if (tiposContrato.includes(contrato.tipo_contrato_id)) {
-      const especificacionesTecnicas =
-        await this.obtenerEspecificacionesTecnicas(contrato.id);
-      return this.formatearEspecificaciones(especificacionesTecnicas);
-    }
-    return null;
-  }
-
   // Lista de especificaciones técnicas asociadas al id de un contrato general
-  async obtenerEspecificacionesTecnicas(idContrato: number) {
-    try {
-      const urlGestionContractualCrud: string = this.configService.get<string>(
-        'GESTION_CONTRACTUAL_CRUD',
-      );
-
-      const url = `${urlGestionContractualCrud}/especificaciones-tecnicas?limit=0&query={"activo":true,"contrato_general_id":${idContrato}}`;
-      const { data } = await axios.get<any>(url);
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async obtenerEspecificacionesTecnicas(idContrato: number) {
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}especificaciones-tecnicas`;
+    const base = `limit=0&query={"activo":true,"contrato_general_id":${idContrato}}`;
+    return this.fetchData(`${url}?${base}`);
   }
 
   // Generación de HTML con datos iniciales
-  async renderizarHTML(plantilla_id: string, datos: any) {
-    try {
-      const urlPlantillasMid: string =
-        this.configService.get<string>('PLANTILLAS_MID');
-      const url = `${urlPlantillasMid}/plantilla/renderizar-html`;
-      const { data } = await axios.post<any>(url, { plantilla_id, datos });
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async renderizarHTML(plantilla_id: string, datos: any) {
+    const url = `${this.configService.get<string>('PLANTILLAS_MID')}plantilla/renderizar-html`;
+    return this.postData(url, { plantilla_id, datos });
   }
 
   // Generación de minuta con datos finales
-  async renderizarPDF(datos: any, html: string) {
-    try {
-      const urlPlantillasMid: string =
-        this.configService.get<string>('PLANTILLAS_MID');
-
-      const url = `${urlPlantillasMid}/plantilla/renderizar-pdf`;
-      const { data } = await axios.post<any>(url, { datos, html });
-
-      if (!data.Success || data.Status != '200') {
-        return null;
-      }
-
-      return data.Data;
-    } catch (error) {
-      return null;
-    }
+  private async renderizarPDF(datos: any, html: string) {
+    const url = `${this.configService.get<string>('PLANTILLAS_MID')}plantilla/renderizar-pdf`;
+    return this.postData(url, { datos, html });
   }
 }

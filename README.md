@@ -18,6 +18,7 @@ CLAUSULAS_PARAGRAFOS_CRUD
 PLANTILLAS_MID
 PROVEEDORES_MID
 ORDENADORES_SUPERVISORES_CONTRATACION_MID
+POLIZAS_MID
 PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
