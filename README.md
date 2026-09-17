@@ -5,8 +5,8 @@ API MID para generación de Minuta
 ## Especificaciones Técnicas
 
 ### Tecnologías Implementadas y Versiones
-* NodeJS 16.13.0
-* NestJS 10.4.9
+* NodeJS 24.x
+* NestJS 11.x
 * [Docker](https://docs.docker.com/engine/install/)
 * [Docker Compose](https://docs.docker.com/compose/)
 
