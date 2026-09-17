@@ -14,7 +14,10 @@ export class MinutaController {
     description: 'Id del contrato general',
     required: true,
   })
-  @ApiResponse({ status: 200, description: 'Solicitud procesada correctamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Solicitud procesada correctamente',
+  })
   @ApiResponse({ status: 400, description: 'Solicitud incorrecta' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor' })

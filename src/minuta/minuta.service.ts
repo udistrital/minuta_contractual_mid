@@ -14,7 +14,7 @@ export class MinutaService {
       const { data } = await axios.get(url);
       if (!data.Success || data.Status !== 200) return null;
       return data.Data;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -25,7 +25,7 @@ export class MinutaService {
       const { data } = await axios.post(url, body);
       if (!data.Success || data.Status !== '200') return null;
       return data.Data;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -76,7 +76,7 @@ export class MinutaService {
       });
 
       console.log(datosIniciales);
-      
+
       const html = await this.renderizarHTML(plantilla_id, datosIniciales);
 
       // Datos finales
@@ -246,7 +246,7 @@ export class MinutaService {
 
   // Información de un contrato general por su id (id's y valores)
   private async obtenerContratoGeneralMid(idContrato: number): Promise<any> {
-    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_MID')}contratos-generales/${idContrato}?ids=true`;    
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_MID')}contratos-generales/${idContrato}?ids=true`;
     return this.fetchData(url);
   }
 
