@@ -19,6 +19,11 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body).toEqual({
+          Status: 'ok',
+          checkCount: expect.any(Number),
+        });
+      });
   });
 });

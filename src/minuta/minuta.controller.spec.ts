@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { MinutaController } from './minuta.controller';
 import { MinutaService } from './minuta.service';
 
@@ -8,7 +9,7 @@ describe('MinutaController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MinutaController],
-      providers: [MinutaService],
+      providers: [MinutaService, ConfigService],
     }).compile();
 
     controller = module.get<MinutaController>(MinutaController);
