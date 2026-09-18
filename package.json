@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,12 +23,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^10.0.0",
-    "@nestjs/config": "^3.3.0",
-    "@nestjs/core": "^10.0.0",
-    "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/swagger": "^8.1.0",
-    "axios": "^1.7.9",
+    "@nestjs/common": "^11.2.5",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.2.5",
+    "@nestjs/platform-express": "^11.2.5",
+    "@nestjs/swagger": "^11.4.7",
+    "axios": "^1.20.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "js-yaml": "^4.1.0",
@@ -34,13 +37,12 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
-    "@nestjs/schematics": "^10.0.0",
-    "@nestjs/testing": "^10.0.0",
+    "@nestjs/cli": "^11.0.24",
+    "@nestjs/schematics": "^11.1.0",
+    "@nestjs/testing": "^11.2.5",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
-    "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^8.0.0",
@@ -56,6 +58,30 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
   },
+  "pnpm": {
+    "overrides": {
+      "lodash": "4.18.0",
+      "form-data": "4.0.6",
+      "js-yaml": "4.3.2",
+      "multer": "2.3.0",
+      "qs": "6.16.0",
+      "path-to-regexp": ">=3.3.0",
+      "webpack": "5.104.1",
+      "brace-expansion": "2.1.4",
+      "validator": "13.15.22",
+      "cross-spawn": "7.0.5",
+      "minimatch": "3.1.4",
+      "picomatch@2.3.1": "2.3.2",
+      "picomatch@4.0.1": "4.0.4",
+      "micromatch": "4.0.8",
+      "schema-utils@3>ajv": "6.15.0",
+      "@eslint/eslintrc>ajv": "6.15.0",
+      "@babel/core": "7.29.7",
+      "@babel/helpers": "7.29.7",
+      "formidable": "3.5.4",
+      "diff": "4.0.4"
+    }
+  },
   "jest": {
     "moduleFileExtensions": [
       "js",
@@ -64,6 +90,9 @@
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
