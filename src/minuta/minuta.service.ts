@@ -85,7 +85,7 @@ export class MinutaService {
         return {
           Success: false,
           Status: HttpStatus.INTERNAL_SERVER_ERROR,
-          Message: `Error al obtener minuta`,
+          Message: `Error al generar minuta`,
         };
       }
 
@@ -95,7 +95,7 @@ export class MinutaService {
         Message: 'Minuta generada exitosamente',
         Data: pdf,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         Success: false,
         Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,

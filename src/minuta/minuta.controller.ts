@@ -1,4 +1,4 @@
-import { Controller, Post, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { MinutaService } from './minuta.service';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
@@ -6,7 +6,7 @@ import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 export class MinutaController {
   constructor(private readonly minutaService: MinutaService) {}
 
-  @Post('contratos/:id')
+  @Get('contratos/:id')
   @ApiOperation({ summary: 'Generación de minuta en PDF (base64)' })
   @ApiParam({
     name: 'id',
