@@ -4,10 +4,11 @@ name: nestjs_api_ci
 
 steps:
   - name: install_dependencies
-    image: node:24-alpine
+    image: node:24-slim
     commands:
-      - npm install -g pnpm
+      - corepack enable
       - pnpm install
+      - pnpm run build
     when:
       branch:
         - develop
@@ -17,9 +18,9 @@ steps:
         - push
 
   - name: build
-    image: node:24-alpine
+    image: node:24-slim
     commands:
-      - npm install -g pnpm
+      - corepack enable
       - pnpm install
       - pnpm run build
     when:
