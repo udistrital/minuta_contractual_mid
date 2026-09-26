@@ -23,7 +23,7 @@ export class MinutaService {
   private async postData(url: string, body: any): Promise<any> {
     try {
       const { data } = await axios.post(url, body);
-      if (!data.Success || data.Status !== 200) return data;
+      if (!data.Success || data.Status !== 200) return null;
       return data.Data;
     } catch {
       return null;
