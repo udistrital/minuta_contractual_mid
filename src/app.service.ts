@@ -10,7 +10,7 @@ export class AppService {
         Status: 'ok',
         checkCount: this.counter++,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         Status: 'error',
         error: error.message,

@@ -68,7 +68,7 @@ export class ActaInicioService {
                 Message: 'Minuta generada exitosamente',
                 Data: pdf,
             };
-        } catch (error) {
+        } catch (error: any) {
             return {
                 Success: false,
                 Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,

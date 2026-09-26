@@ -16,7 +16,7 @@
       }
     },
     "/minutas/contratos/{id}": {
-      "post": {
+      "get": {
         "operationId": "MinutaController_obtenerMinuta",
         "parameters": [
           {

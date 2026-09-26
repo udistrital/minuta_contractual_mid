@@ -23,7 +23,7 @@ export class MinutaService {
   private async postData(url: string, body: any): Promise<any> {
     try {
       const { data } = await axios.post(url, body);
-      if (!data.Success || data.Status !== '200') return null;
+      if (!data.Success || data.Status !== 200) return null;
       return data.Data;
     } catch {
       return null;
@@ -75,17 +75,22 @@ export class MinutaService {
         clausulas,
       });
 
-      console.log(datosIniciales);
-
       const html = await this.renderizarHTML(plantilla_id, datosIniciales);
+      if (!html) {
+        return {
+          Success: false,
+          Status: HttpStatus.INTERNAL_SERVER_ERROR,
+          Message: `Error al generar minuta, paso 1`,
+        };
+      }
 
       // Datos finales
-      const pdf = await this.renderizarPDF({}, html);
+      const pdf = await this.renderizarPDF(datosIniciales, html);
       if (!pdf) {
         return {
           Success: false,
           Status: HttpStatus.INTERNAL_SERVER_ERROR,
-          Message: `Error al obtener minuta`,
+          Message: `Error al generar minuta, paso 2`,
         };
       }
 
@@ -95,7 +100,7 @@ export class MinutaService {
         Message: 'Minuta generada exitosamente',
         Data: pdf,
       };
-    } catch (error) {
+    } catch (error: any) {
       return {
         Success: false,
         Status: error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -298,12 +303,12 @@ export class MinutaService {
   // Generación de HTML con datos iniciales
   private async renderizarHTML(plantilla_id: string, datos: any) {
     const url = `${this.configService.get<string>('PLANTILLAS_MID')}plantilla/renderizar-html`;
-    return this.postData(url, { plantilla_id, datos });
+    return this.postData(url, { plantilla_id, data: datos });
   }
 
   // Generación de minuta con datos finales
   private async renderizarPDF(datos: any, html: string) {
     const url = `${this.configService.get<string>('PLANTILLAS_MID')}plantilla/renderizar-pdf`;
-    return this.postData(url, { datos, html });
+    return this.postData(url, { data: datos, html });
   }
 }
