@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { MinutaModule } from './minuta/minuta.module';
 import { ActaInicioModule } from './acta_inicio/acta_inicio.module';
+import { ActaPolizaModule } from './acta_poliza/acta_poliza.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ActaInicioModule } from './acta_inicio/acta_inicio.module';
     }),
     MinutaModule,
     ActaInicioModule,
+    ActaPolizaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
