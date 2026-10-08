@@ -373,7 +373,10 @@ export class ActaPolizaService {
   // Número de documento del contratista asociado a un contrato general
   private async obtenerDocumento(idContrato: number): Promise<any> {
     const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}contratistas/contrato/${idContrato}`;
-    const data = await this.fetchData(url, 'gestion_contractual_crud (contratista)');
+    const data = await this.fetchData(
+      url,
+      'gestion_contractual_crud (contratista)',
+    );
     return data?.numero_documento;
   }
 
@@ -383,7 +386,10 @@ export class ActaPolizaService {
   ): Promise<string | null> {
     if (!unidadEjecucionId) return null;
     const url = `${this.configService.get<string>('PARAMETROS_CRUD')}parametro/${unidadEjecucionId}`;
-    const data = await this.fetchData(url, 'parametros_crud (unidad del plazo)');
+    const data = await this.fetchData(
+      url,
+      'parametros_crud (unidad del plazo)',
+    );
     return data?.Nombre || null;
   }
 

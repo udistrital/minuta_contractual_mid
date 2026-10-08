@@ -23,7 +23,10 @@ export class ActaPolizaController {
   @ApiResponse({ status: 400, description: 'Póliza inconsistente' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor' })
-  @ApiResponse({ status: 502, description: 'Servicio dependiente no disponible' })
+  @ApiResponse({
+    status: 502,
+    description: 'Servicio dependiente no disponible',
+  })
   async obtenerActaPoliza(@Param('id') id: number) {
     return await this.actaPolizaService.obtenerActaPoliza(id);
   }
@@ -56,7 +59,10 @@ export class ActaPolizaController {
   @ApiResponse({ status: 200, description: 'Borrador generado correctamente' })
   @ApiResponse({ status: 400, description: 'Póliza inconsistente' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
-  @ApiResponse({ status: 502, description: 'Servicio dependiente no disponible' })
+  @ApiResponse({
+    status: 502,
+    description: 'Servicio dependiente no disponible',
+  })
   async obtenerBorradorActaPoliza(
     @Param('id') id: number,
     @Body() body: { amparos?: FilaAmparoBorrador[] },
