@@ -31,6 +31,64 @@ paths:
       summary: Generación de minuta en PDF (base64)
       tags:
         - Minuta
+  /acta-poliza/contratos/{id}:
+    get:
+      operationId: ActaPolizaController_obtenerActaPoliza
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Id del contrato general
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Solicitud procesada correctamente
+        '400':
+          description: Póliza inconsistente
+        '404':
+          description: Recurso no encontrado
+        '500':
+          description: Error interno del servidor
+        '502':
+          description: Servicio dependiente no disponible
+      summary: Generación del acta de aprobación de póliza en PDF (base64)
+      tags: &ref_0
+        - ActaPoliza
+  /acta-poliza/contratos/{id}/borrador:
+    post:
+      operationId: ActaPolizaController_obtenerBorradorActaPoliza
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Id del contrato general
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              example:
+                amparos:
+                  - id: 1
+                    valor: 5000000
+                    fecha_inicio: '2024-01-15'
+                    fecha_fin: '2025-01-15'
+      responses:
+        '200':
+          description: Borrador generado correctamente
+        '400':
+          description: Póliza inconsistente
+        '404':
+          description: Recurso no encontrado
+        '502':
+          description: Servicio dependiente no disponible
+      summary: >-
+        Borrador del acta de aprobación de póliza en PDF (base64), con amparos
+        aún sin registrar
+      tags: *ref_0
 info:
   title: Minuta Contractual MID
   description: API
