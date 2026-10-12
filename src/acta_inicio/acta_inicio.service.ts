@@ -1,6 +1,6 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { camposPlantilla, plantillas } from './conf';
+import { camposPlantilla, plantillas, estiloEncabezadoPdf } from './conf';
 import { environment } from 'src/environments/environment';
 import axios from 'axios';
 import {
@@ -468,7 +468,10 @@ export class ActaInicioService {
                 this.configService.get<string>('PLANTILLAS_MID');
 
             const url = `${urlPlantillasMid}plantilla/renderizar-pdf`;
-            const { data } = await axios.post<any>(url, { data: datos, html });
+            const { data } = await axios.post<any>(url, {
+                data: datos,
+                html: html.replace('</head>', `${estiloEncabezadoPdf}</head>`),
+            });
 
             if (!data.Success || data.Status != '200') {
                 return null;
@@ -812,6 +815,16 @@ export class ActaInicioService {
             descripcion: entrada.descripcion ?? `Acta de inicio del contrato ${datos.numero_contrato}`,
             fecha_inicio: datos.fecha_inicio,
             fecha_fin: datos.fecha_terminacion,
+            // Datos del formulario que no existen en otras tablas
+            fecha_suscripcion:
+                aFechaIso(entrada.fecha_suscripcion) ?? fechaActualColombia(),
+            numero_acta: entrada.numero_acta ?? entrada.variables?.numero_acta,
+            valor_disponibilidad: entrada.valor_disponibilidad,
+            numero_registro_presupuestal: entrada.variables?.certificado_registro,
+            valor_registro_presupuestal: entrada.valor_registro,
+            valor_anticipo: entrada.valor_anticipo,
+            nombre_interventor:
+                entrada.nombre_interventor ?? entrada.variables?.nombre_interventor,
             contrato_general_id: Number(idContrato),
             activo: true,
         };

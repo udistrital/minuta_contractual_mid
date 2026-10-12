@@ -1,5 +1,11 @@
 import { environment } from 'src/environments/environment';
 
+// El encabezado de las plantillas (logos, código y versión) tiene columnas que
+// suman 100% más su relleno y en el PDF se sale del margen derecho. Con anchos
+// menores la tabla se ajusta al 100% de la página, igual que las demás tablas
+export const estiloEncabezadoPdf =
+  '<style>.header-table td:first-child { width: 17%; } .header-table td:not(:first-child) { width: 23%; }</style>';
+
 // Configuración de plantillas por unidad ejecutora y tipo de contrato
 export const plantillas: any = {
   [environment.UNIDADES_EJECUTORAS.RECTORIA]: {
