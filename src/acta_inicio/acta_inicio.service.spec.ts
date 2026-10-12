@@ -31,8 +31,9 @@ describe('ActaInicioService', () => {
         ]),
       ),
     );
-    axios.defaults.adapter = serviciosMock.crearAdaptador(
-      axios.getAdapter(adaptadorOriginal),
+    // Las pruebas no llaman al plantillas_mid real: el PDF sale del render local
+    axios.defaults.adapter = serviciosMock.crearAdaptador(() =>
+      Promise.reject(new Error('sin conexión en pruebas')),
     );
   });
 
