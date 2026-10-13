@@ -18,7 +18,9 @@ CLAUSULAS_PARAGRAFOS_CRUD
 PLANTILLAS_MID
 PROVEEDORES_MID
 ORDENADORES_SUPERVISORES_CONTRATACION_MID
-POLIZAS_MID
+PARAMETROS_CRUD
+GESTOR_DOCUMENTAL_MID
+ACTA_INICIO_MOCK: [true para probar el acta de inicio con datos simulados]
 PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
@@ -41,7 +43,7 @@ Nota: Para otras plataformas de PNPM consultar la [documentación oficial](https
 
 ### Swagger
 ```shell
-http://localhost:3000/api
+http://localhost:3000/swagger
 ```
 
 ### Ejecución Dockerfile
@@ -60,6 +62,12 @@ Pruebas unitarias
 ```shell
 # Test
 pnpm test
+
+# Test
+pnpm test:e2e
+
+# Cobertura de pruebas
+pnpm test:cov
 
 # Se ejecutará jest, validando los casos de prueba en los archivos .spec.ts
 

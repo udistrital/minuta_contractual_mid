@@ -48,6 +48,164 @@
           "Minuta"
         ]
       }
+    },
+    "/acta-inicio/contratos/{id}": {
+      "get": {
+        "operationId": "ActaInicioController_obtenerPrecarga",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Id del contrato general",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Solicitud procesada correctamente"
+          }
+        },
+        "summary": "Datos precargados del acta de inicio, campos faltantes y prerrequisitos",
+        "tags": [
+          "ActaInicio"
+        ]
+      },
+      "post": {
+        "operationId": "ActaInicioController_generar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Id del contrato general",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerarActaInicioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud procesada correctamente"
+          }
+        },
+        "summary": "Genera el acta de inicio: PDF, gestor documental, registro del acta y contrato en ejecución",
+        "tags": [
+          "ActaInicio"
+        ]
+      }
+    },
+    "/acta-inicio/contratos/{id}/previsualizacion": {
+      "post": {
+        "operationId": "ActaInicioController_previsualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Id del contrato general",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatosActaInicioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud procesada correctamente"
+          }
+        },
+        "summary": "Vista previa del acta de inicio en PDF (base64)",
+        "tags": [
+          "ActaInicio"
+        ]
+      }
+    },
+    "/acta-inicio/{id}": {
+      "get": {
+        "operationId": "ActaInicioController_obtenerActaPorContrato",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Id del contrato general",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Solicitud procesada correctamente"
+          }
+        },
+        "summary": "Acta de inicio registrada para un contrato y su documento",
+        "tags": [
+          "ActaInicio"
+        ]
+      }
+    },
+    "/acta-inicio/mock/contratos/{id}/pdf": {
+      "get": {
+        "operationId": "ActaInicioMockController_pdf",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": 9001,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "PDF del acta de inicio del contrato simulado (9001, 9002, 9003 y 9005) con sus datos de formulario",
+        "tags": [
+          "ActaInicioMock"
+        ]
+      }
+    },
+    "/acta-inicio/mock/reiniciar": {
+      "post": {
+        "operationId": "ActaInicioMockController_reiniciar",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Borra las actas, documentos y estados simulados",
+        "tags": [
+          "ActaInicioMock"
+        ]
+      }
     }
   },
   "info": {
@@ -64,6 +222,264 @@
   ],
   "servers": [],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "PersonaActaDto": {
+        "type": "object",
+        "properties": {
+          "nombres_apellidos": {
+            "type": "string",
+            "example": "Ing. Martha Lucía Ramírez"
+          },
+          "cargo": {
+            "type": "string",
+            "example": "Director de Obra"
+          },
+          "especialidad": {
+            "type": "string",
+            "example": "Ingeniería Civil / Estructuras"
+          },
+          "tarjeta_profesional": {
+            "type": "string",
+            "example": "IC-456789-CND"
+          }
+        }
+      },
+      "MaquinariaActaDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "example": "Excavadora de Orugas"
+          },
+          "referencia": {
+            "type": "string",
+            "example": "CAT 320 GC"
+          },
+          "cantidad": {
+            "type": "number",
+            "example": 1
+          },
+          "estado": {
+            "type": "string",
+            "example": "Excelente"
+          }
+        }
+      },
+      "EquipoActaDto": {
+        "type": "object",
+        "properties": {
+          "equipo": {
+            "type": "string",
+            "example": "Analizador de Energía"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Analizador de calidad de energía trifásico"
+          },
+          "certificado_calibracion": {
+            "type": "string",
+            "example": "CERT-CAL-2026-8891"
+          },
+          "codigo_referencia": {
+            "type": "string",
+            "example": "EQ-FLUKE-1736"
+          }
+        }
+      },
+      "DatosActaInicioDto": {
+        "type": "object",
+        "properties": {
+          "fecha_inicio": {
+            "type": "string",
+            "example": "2026-02-15",
+            "description": "Fecha de inicio de ejecución"
+          },
+          "fecha_terminacion": {
+            "type": "string",
+            "example": "2026-12-15",
+            "description": "Fecha de terminación. Si no se envía se calcula con el plazo"
+          },
+          "fecha_suscripcion": {
+            "type": "string",
+            "example": "2026-02-15",
+            "description": "Fecha de suscripción del acta. Por defecto, la fecha actual"
+          },
+          "numero_acta": {
+            "type": "string",
+            "example": "ACT-005-2026"
+          },
+          "ciudad": {
+            "type": "string",
+            "example": "Bogotá D.C."
+          },
+          "valor_anticipo": {
+            "type": "number",
+            "example": 360000000
+          },
+          "valor_disponibilidad": {
+            "type": "number",
+            "example": 45000000
+          },
+          "valor_registro": {
+            "type": "number",
+            "example": 45000000
+          },
+          "localizacion_proyecto": {
+            "type": "string",
+            "example": "Sede Tecnológica - Bogotá D.C."
+          },
+          "nombre_interventor": {
+            "type": "string",
+            "example": "Interventorías Globales Ltda."
+          },
+          "ciudad_expedicion_supervisor": {
+            "type": "string",
+            "example": "Medellín"
+          },
+          "nombre_facultad": {
+            "type": "string",
+            "description": "Facultad donde se ejecuta el contrato (compraventa). Si no se envía, se toma la dependencia del lugar de ejecución",
+            "example": "Ingeniería"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Otras variables de plantilla a sobrescribir (clave: nombre de la variable)",
+            "example": {
+              "nombre_supervisor": "María Fernanda Restrepo"
+            }
+          },
+          "personal_directivo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaActaDto"
+            }
+          },
+          "personal_operativo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaActaDto"
+            }
+          },
+          "maquinaria_equipo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaquinariaActaDto"
+            }
+          },
+          "equipos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EquipoActaDto"
+            }
+          }
+        }
+      },
+      "GenerarActaInicioDto": {
+        "type": "object",
+        "properties": {
+          "fecha_inicio": {
+            "type": "string",
+            "example": "2026-02-15",
+            "description": "Fecha de inicio de ejecución"
+          },
+          "fecha_terminacion": {
+            "type": "string",
+            "example": "2026-12-15",
+            "description": "Fecha de terminación. Si no se envía se calcula con el plazo"
+          },
+          "fecha_suscripcion": {
+            "type": "string",
+            "example": "2026-02-15",
+            "description": "Fecha de suscripción del acta. Por defecto, la fecha actual"
+          },
+          "numero_acta": {
+            "type": "string",
+            "example": "ACT-005-2026"
+          },
+          "ciudad": {
+            "type": "string",
+            "example": "Bogotá D.C."
+          },
+          "valor_anticipo": {
+            "type": "number",
+            "example": 360000000
+          },
+          "valor_disponibilidad": {
+            "type": "number",
+            "example": 45000000
+          },
+          "valor_registro": {
+            "type": "number",
+            "example": 45000000
+          },
+          "localizacion_proyecto": {
+            "type": "string",
+            "example": "Sede Tecnológica - Bogotá D.C."
+          },
+          "nombre_interventor": {
+            "type": "string",
+            "example": "Interventorías Globales Ltda."
+          },
+          "ciudad_expedicion_supervisor": {
+            "type": "string",
+            "example": "Medellín"
+          },
+          "nombre_facultad": {
+            "type": "string",
+            "description": "Facultad donde se ejecuta el contrato (compraventa). Si no se envía, se toma la dependencia del lugar de ejecución",
+            "example": "Ingeniería"
+          },
+          "variables": {
+            "type": "object",
+            "description": "Otras variables de plantilla a sobrescribir (clave: nombre de la variable)",
+            "example": {
+              "nombre_supervisor": "María Fernanda Restrepo"
+            }
+          },
+          "personal_directivo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaActaDto"
+            }
+          },
+          "personal_operativo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonaActaDto"
+            }
+          },
+          "maquinaria_equipo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaquinariaActaDto"
+            }
+          },
+          "equipos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EquipoActaDto"
+            }
+          },
+          "usuario_id": {
+            "type": "number",
+            "example": 1,
+            "description": "Id del usuario que genera el acta"
+          },
+          "usuario_rol": {
+            "type": "string",
+            "example": "ABOGADO_CONTRATACION_RECTOR",
+            "description": "Rol del usuario que genera el acta"
+          },
+          "descripcion": {
+            "type": "string",
+            "example": "Acta de inicio del contrato"
+          }
+        },
+        "required": [
+          "usuario_id",
+          "usuario_rol"
+        ]
+      }
+    }
   }
 }
