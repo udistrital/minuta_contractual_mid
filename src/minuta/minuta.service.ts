@@ -54,12 +54,13 @@ export class MinutaService {
       }
 
       // Datos iniciales
-      const [documentoProveedor, ordenadorArgoId, clausulas, especificaciones] =
+      const [documentoProveedor, ordenadorArgoId, clausulas, especificaciones, supervisor] =
         await Promise.all([
           this.obtenerDocumento(idContrato),
           this.obtenerOrdenadorArgoId(idContrato),
-          this.obtenerPlantillaClausulas(9512),
+          this.obtenerPlantillaClausulas(idContrato, contratoMid.tipo_contrato_id),
           this.obtenerEspecificaciones(contratoMid),
+          this.obtenerSupervisor(idContrato),
         ]);
       const [contratista, ordenador] = await Promise.all([
         this.obtenerContratista(documentoProveedor),
@@ -70,6 +71,7 @@ export class MinutaService {
         contratoMid,
         contratista,
         ordenador,
+        supervisor,
         especificaciones,
         amparos,
         clausulas,
@@ -135,10 +137,29 @@ export class MinutaService {
       info_resolucion,
     } = data.ordenador || {};
 
+    // Supervisor
+    const nombreSupervisor =
+      data.supervisor?.nombre ||
+      data.supervisor?.cargo ||
+      '';
+    const cargoSupervisor = data.supervisor?.cargo || '';
+    const dependenciaSupervisor = data.supervisor?.dependencia || '';
+
+    // Contrato base
+    const objeto = data.contratoMid?.objeto || '';
+    const plazoEjecucion = data.contratoMid?.plazo_ejecucion || '';
+    const valorPesos = data.contratoMid?.valor_pesos
+      ? this.formatearAPesosColombianos(data.contratoMid.valor_pesos)
+      : '';
+
     // Combinacion de los datos
     let datos: any = {
-      contrato_numero: 'XXXXXXX', // Valor faltante
+      contrato_numero: data.contratoMid?.id ? `No. ${data.contratoMid.id}` : 'XXXXXXX',
+      numero_contrato: data.contratoMid?.id ? `${data.contratoMid.id}` : 'XXXXXXX',
       vigencia: vigencia || 'XXXXXXX',
+      objeto: objeto || 'XXXXXXX',
+      plazo_ejecucion: plazoEjecucion || 'XXXXXXX',
+      valor_pesos: valorPesos || 'XXXXXXX',
       ordenador_nombre: nombre_ordenador || 'XXXXXXX',
       ordenador_cedula: documento || 'XXXXXXX',
       ordenador_lugar_exp: nombre_ciudad || 'XXXXXXX',
@@ -148,6 +169,13 @@ export class MinutaService {
       contratista_tipo_persona: tipo_persona || 'XXXXXXX',
       contratista_numero_documento: numero_documento || 'XXXXXXX',
       contratista_lugar_exp: ciudad_expedicion_documento || 'XXXXXXX',
+      supervisor_nombre: nombreSupervisor || 'XXXXXXX',
+      nombre_supervisor: nombreSupervisor || 'XXXXXXX',
+      supervisor: nombreSupervisor || 'XXXXXXX',
+      supervisor_cargo: cargoSupervisor || 'XXXXXXX',
+      cargo_supervisor: cargoSupervisor || 'XXXXXXX',
+      supervisor_dependencia: dependenciaSupervisor || 'XXXXXXX',
+      dependencia_supervisor: dependenciaSupervisor || 'XXXXXXX',
       justificacion: 'XXXXXXX', // Valor faltante
       modalidad_seleccion_tipo: modalidad_seleccion || 'XXXXXXX',
       fecha_suscripcion_estudios: fecha_suscripcion_estudios || 'XXXXXXX',
@@ -282,9 +310,63 @@ export class MinutaService {
   }
 
   // Clausulas asociadas al id de un contrato general (contiene variables {{}} a reemplazar)
-  private async obtenerPlantillaClausulas(idContrato: number) {
+  private async obtenerPlantillaClausulas(idContrato: number, tipoContratoId?: number) {
     const url = `${this.configService.get<string>('CLAUSULAS_PARAGRAFOS_CRUD')}contratos/${idContrato}`;
-    return this.fetchData(url);
+    const data = await this.fetchData(url);
+    if (Array.isArray(data) && data.length > 0) {
+      return data;
+    }
+    if (data?.Data && Array.isArray(data.Data) && data.Data.length > 0) {
+      return data.Data;
+    }
+    // Fallback a plantilla del tipo de contrato si el contrato no tiene clausulado guardado
+    if (tipoContratoId) {
+      const urlPlantilla = `${this.configService.get<string>('CLAUSULAS_PARAGRAFOS_CRUD')}plantilla-tipo-contratos/tipo-contrato/${tipoContratoId}`;
+      const dataPlantilla = await this.fetchData(urlPlantilla);
+      if (Array.isArray(dataPlantilla) && dataPlantilla.length > 0) {
+        return dataPlantilla;
+      }
+      if (dataPlantilla?.Data && Array.isArray(dataPlantilla.Data) && dataPlantilla.Data.length > 0) {
+        return dataPlantilla.Data;
+      }
+    }
+    return null;
+  }
+
+  // Información del supervisor asociado a un contrato general
+  private async obtenerSupervisor(idContrato: number) {
+    try {
+      const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}supervisores/contrato/${idContrato}`;
+      const response = await this.fetchData(url);
+      const supervisores = Array.isArray(response) ? response : response?.Data || [];
+      const supervisor = supervisores[0];
+      if (!supervisor) return null;
+
+      let nombre = supervisor.nombre || '';
+      let cargo = supervisor.cargo_legado || '';
+      let dependencia = supervisor.dependencia_legado || supervisor.sede_legado || '';
+
+      if (supervisor.dependencia_id) {
+        const urlMid = `${this.configService.get<string>('ORDENADORES_SUPERVISORES_CONTRATACION_MID')}supervisores/dependencia?dependenciaId=${supervisor.dependencia_id}&fecha=2023-10-01`;
+        const dataMid = await this.fetchData(urlMid);
+        const listaMid = Array.isArray(dataMid) ? dataMid : dataMid?.Data || dataMid?.Body || [];
+        const supMid = listaMid[0];
+        if (supMid) {
+          nombre = supMid.nombre || nombre;
+          cargo = supMid.cargo || cargo;
+          dependencia = supMid.dependencia_supervisor || dependencia;
+        }
+      }
+
+      return {
+        nombre,
+        cargo,
+        dependencia,
+        documento: supervisor.documento || '',
+      };
+    } catch {
+      return null;
+    }
   }
 
   // Lista de amparos
