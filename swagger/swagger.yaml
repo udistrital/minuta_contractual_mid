@@ -34,9 +34,6 @@ paths:
   /acta-inicio/contratos/{id}:
     get:
       operationId: ActaInicioController_obtenerPrecarga
-  /acta-poliza/contratos/{id}:
-    get:
-      operationId: ActaPolizaController_obtenerActaPoliza
       parameters:
         - name: id
           required: true
@@ -52,20 +49,6 @@ paths:
         - ActaInicio
     post:
       operationId: ActaInicioController_generar
-        '400':
-          description: Póliza inconsistente
-        '404':
-          description: Recurso no encontrado
-        '500':
-          description: Error interno del servidor
-        '502':
-          description: Servicio dependiente no disponible
-      summary: Generación del acta de aprobación de póliza en PDF (base64)
-      tags: &ref_0
-        - ActaPoliza
-  /acta-poliza/contratos/{id}/borrador:
-    post:
-      operationId: ActaPolizaController_obtenerBorradorActaPoliza
       parameters:
         - name: id
           required: true
@@ -122,33 +105,45 @@ paths:
           description: Solicitud procesada correctamente
       summary: Acta de inicio registrada para un contrato y su documento
       tags: *ref_0
-  /acta-inicio/mock/contratos/{id}/pdf:
+  /acta-poliza/contratos/{id}:
     get:
-      operationId: ActaInicioMockController_pdf
+      operationId: ActaPolizaController_obtenerActaPoliza
       parameters:
         - name: id
           required: true
           in: path
+          description: Id del contrato general
           schema:
-            example: 9001
             type: number
       responses:
         '200':
-          description: ''
-      summary: >-
-        PDF del acta de inicio del contrato simulado (9001, 9002, 9003 y 9005)
-        con sus datos de formulario
+          description: Solicitud procesada correctamente
+        '400':
+          description: Póliza inconsistente
+        '404':
+          description: Recurso no encontrado
+        '500':
+          description: Error interno del servidor
+        '502':
+          description: Servicio dependiente no disponible
+      summary: Generación del acta de aprobación de póliza en PDF (base64)
       tags: &ref_1
-        - ActaInicioMock
-  /acta-inicio/mock/reiniciar:
+        - ActaPoliza
+  /acta-poliza/contratos/{id}/borrador:
     post:
-      operationId: ActaInicioMockController_reiniciar
-      parameters: []
-      responses:
-        '201':
-          description: ''
-      summary: Borra las actas, documentos y estados simulados
-      tags: *ref_1
+      operationId: ActaPolizaController_obtenerBorradorActaPoliza
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Id del contrato general
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
               example:
                 amparos:
                   - id: 1
@@ -167,7 +162,7 @@ paths:
       summary: >-
         Borrador del acta de aprobación de póliza en PDF (base64), con amparos
         aún sin registrar
-      tags: *ref_0
+      tags: *ref_1
 info:
   title: Minuta Contractual MID
   description: API
