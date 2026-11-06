@@ -1,0 +1,63 @@
+{
+  "plantilla_id": "67930bb0206ae652dbeb3d09",
+  "data": {
+    "tipo_contrato": "Contrato de Obra",
+    "numero_contrato": "OBR-0021-2026",
+    "objeto_contrato": "Adecuación de laboratorios de ingeniería eléctrica en la Facultad Tecnológica, incluidas redes eléctricas, hidrosanitarias y obra civil.",
+    "localizacion_proyecto": "Facultad Tecnológica, Transversal 70B No. 73 Bis A Sur 20",
+    "valor_contrato": "$ 1.450.000.000",
+    "plazo_vigencia": "10 meses",
+    "valor_anticipo": "$ 435.000.000",
+    "fecha_iniciacion": "2026-03-02",
+    "fecha_terminacion": "2027-01-02",
+    "contratista": "Construcciones Andinas S.A.S.",
+    "nombre_representante_legal": "Jorge Enrique Salazar Pineda",
+    "nombre_supervisor": "Ing. Diana Patricia Cárdenas Ruiz",
+    "ciudad": "Bogotá D.C.",
+    "dia": "dos",
+    "mes": "marzo",
+    "year": "2026",
+    "dia_conclusion": "dos",
+    "dia_numero": "2",
+    "mes_conclusion": "enero",
+    "year_conclusion": "2027",
+    "personal_directivo": [
+      {
+        "nombres_apellidos": "Ing. Andrés Felipe Gómez",
+        "cargo": "Director de obra",
+        "especialidad": "Ingeniería civil",
+        "tarjeta_profesional": "25202-123456 CND"
+      },
+      {
+        "nombres_apellidos": "Ing. Natalia Ruiz Peña",
+        "cargo": "Residente eléctrica",
+        "especialidad": "Ingeniería eléctrica",
+        "tarjeta_profesional": "CN205-78945"
+      }
+    ],
+    "personal_operativo": [
+      {
+        "cargo": "Maestro general",
+        "nombres_apellidos": "Luis Alberto Mora"
+      },
+      {
+        "cargo": "Inspector SST",
+        "nombres_apellidos": "Sandra Milena Cruz"
+      }
+    ],
+    "maquinaria_equipo": [
+      {
+        "tipo": "Mezcladora de concreto",
+        "referencia": "MX-350",
+        "cantidad": 2,
+        "estado": "Bueno"
+      },
+      {
+        "tipo": "Andamio tubular certificado",
+        "referencia": "AT-2M",
+        "cantidad": 20,
+        "estado": "Excelente"
+      }
+    ]
+  }
+}

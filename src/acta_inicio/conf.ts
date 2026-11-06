@@ -1,5 +1,11 @@
 import { environment } from 'src/environments/environment';
 
+// El encabezado de las plantillas (logos, código y versión) tiene columnas que
+// suman 100% más su relleno y en el PDF se sale del margen derecho. Con anchos
+// menores la tabla se ajusta al 100% de la página, igual que las demás tablas
+export const estiloEncabezadoPdf =
+  '<style>.header-table td:first-child { width: 17%; } .header-table td:not(:first-child) { width: 23%; }</style>';
+
 // Configuración de plantillas por unidad ejecutora y tipo de contrato
 export const plantillas: any = {
   [environment.UNIDADES_EJECUTORAS.RECTORIA]: {
@@ -26,4 +32,110 @@ export const plantillas: any = {
     [environment.TIPOS_DE_CONTRATO.PRESTACION_DE_SERVICIOS]: '',
     [environment.TIPOS_DE_CONTRATO.PRESTACION_DE_SERVICIOS_PROFESIONALES]: '',
   },
+};
+
+// Variables que debe recibir cada plantilla (formatos GC-PR-013). Si una llega
+// sin valor, el acta no se genera
+export const camposPlantilla: Record<string, string[]> = {
+  // GC-PR-013-FR-047 Prestación de servicios (y profesionales)
+  '67930c2a206ae652dbeb3d0b': [
+    'numero_contrato',
+    'objeto_contrato',
+    'valor_contrato',
+    'plazo_contrato',
+    'fecha_inicio',
+    'fecha_terminacion',
+    'numero_poliza',
+    'fecha_expedicion_poliza',
+    'fecha_aprobacion_poliza',
+    'certificado_disponibilidad',
+    'valor_disponibilidad',
+    'nombre_contratista',
+    'cedula_contratista',
+    'ciudad_expedicion_contratista',
+    'nombre_supervisor',
+    'cedula_supervisor',
+    'ciudad_expedicion_supervisor',
+    'ciudad',
+    'dia',
+    'dia_numero',
+    'mes',
+    'year',
+    'dia_inicio',
+    'mes_inicio',
+    'year_inicio',
+  ],
+  // GC-PR-013-FR-046 Obra
+  '67930bb0206ae652dbeb3d09': [
+    'tipo_contrato',
+    'numero_contrato',
+    'objeto_contrato',
+    'localizacion_proyecto',
+    'valor_contrato',
+    'plazo_vigencia',
+    'valor_anticipo',
+    'fecha_iniciacion',
+    'fecha_terminacion',
+    'contratista',
+    'nombre_representante_legal',
+    'nombre_supervisor',
+    'ciudad',
+    'dia',
+    'mes',
+    'year',
+    'dia_conclusion',
+    'dia_numero',
+    'mes_conclusion',
+    'year_conclusion',
+  ],
+  // GC-PR-013-FR-045 Interadministrativo (interventoría)
+  '67930b1a206ae652dbeb3d07': [
+    'numero_acta',
+    'numero_contrato',
+    'objeto_contrato',
+    'localizacion_proyecto',
+    'valor_contrato',
+    'nombre_contratista',
+    'plazo_vigencia',
+    'valor_anticipo',
+    'fecha_iniciacion',
+    'fecha_terminacion',
+    'nombre_supervisor',
+    'nombre_interventor',
+    'ciudad',
+    'dia',
+    'mes',
+    'year',
+    'dia_conclusion',
+    'dia_numero',
+    'mes_conclusion',
+    'year_conclusion',
+  ],
+  // GC-PR-013-FR-051 Compraventa
+  '67930c80206ae652dbeb3d0d': [
+    'tipo_contrato',
+    'numero_contrato',
+    'objeto_contrato',
+    'localizacion_proyecto',
+    'valor_contrato',
+    'nombre_contratista',
+    'plazo_vigencia',
+    'valor_anticipo',
+    'fecha_iniciacion',
+    'fecha_terminacion',
+    'nombre_facultad',
+    'dia',
+    'mes',
+    'year',
+    'nombre_supervisor',
+    'cedula_supervisor',
+    'ciudad_expedicion_supervisor',
+    'cedula_contratista',
+    'nombre_representante',
+    'nit_representante',
+    'dia_conclusion',
+    'dia_numero',
+    'mes_conclusion',
+    'year_conclusion',
+  ],
 };

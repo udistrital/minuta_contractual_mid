@@ -1,0 +1,29 @@
+{
+  "plantilla_id": "67930c80206ae652dbeb3d0d",
+  "data": {
+    "tipo_contrato": "Compraventa",
+    "numero_contrato": "CPV-042-2026",
+    "objeto_contrato": "Suministro, instalación y puesta en funcionamiento de equipos de laboratorio para alta acreditación.",
+    "localizacion_proyecto": "Laboratorios de la Facultad de Ingeniería",
+    "valor_contrato": "$ 350.000.000",
+    "nombre_contratista": "Tecnologías Científicas Avanzadas S.A.S.",
+    "plazo_vigencia": "6 meses",
+    "valor_anticipo": "$ 0",
+    "fecha_iniciacion": "2026-05-12",
+    "fecha_terminacion": "2026-11-12",
+    "nombre_facultad": "Ingeniería",
+    "dia": "doce",
+    "mes": "mayo",
+    "year": "2026",
+    "nombre_supervisor": "Ing. Carlos Alberto Martínez",
+    "cedula_supervisor": "79.887.654",
+    "ciudad_expedicion_supervisor": "Bogotá D.C.",
+    "cedula_contratista": "1.020.443.221",
+    "nombre_representante": "Alejandro Restrepo Hoyos",
+    "nit_representante": "901.345.678-9",
+    "dia_conclusion": "doce",
+    "dia_numero": "12",
+    "mes_conclusion": "noviembre",
+    "year_conclusion": "2026"
+  }
+}

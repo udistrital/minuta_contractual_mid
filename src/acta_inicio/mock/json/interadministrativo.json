@@ -1,0 +1,47 @@
+{
+  "plantilla_id": "67930b1a206ae652dbeb3d07",
+  "data": {
+    "numero_acta": "AI-001-2026",
+    "numero_contrato": "CIA-0007-2026",
+    "objeto_contrato": "Interventoría técnica, administrativa, financiera y ambiental a la adecuación de laboratorios de la Facultad Tecnológica.",
+    "localizacion_proyecto": "Facultad Tecnológica, Bogotá D.C.",
+    "valor_contrato": "$ 174.000.000",
+    "nombre_contratista": "Empresa de Desarrollo Urbano Distrital",
+    "plazo_vigencia": "300 días",
+    "valor_anticipo": "$ 0",
+    "fecha_iniciacion": "2026-03-02",
+    "fecha_terminacion": "2026-12-27",
+    "nombre_supervisor": "Ing. Diana Patricia Cárdenas Ruiz",
+    "nombre_interventor": "Empresa de Desarrollo Urbano Distrital",
+    "ciudad": "Bogotá D.C.",
+    "dia": "dos",
+    "mes": "marzo",
+    "year": "2026",
+    "dia_conclusion": "veintisiete",
+    "dia_numero": "27",
+    "mes_conclusion": "diciembre",
+    "year_conclusion": "2026",
+    "personal_directivo": [
+      {
+        "nombres_apellidos": "Ing. Martha Lucía Ramírez",
+        "cargo": "Directora de interventoría",
+        "especialidad": "Ingeniería civil",
+        "tarjeta_profesional": "25202-998877 CND"
+      }
+    ],
+    "personal_operativo": [
+      {
+        "cargo": "Inspector de obra",
+        "nombres_apellidos": "Héctor Fabio Benítez"
+      }
+    ],
+    "equipos": [
+      {
+        "equipo": "Analizador de energía",
+        "descripcion": "Analizador trifásico de calidad de energía",
+        "certificado_calibracion": "CAL-2026-0311",
+        "codigo_referencia": "FLUKE-1736"
+      }
+    ]
+  }
+}
