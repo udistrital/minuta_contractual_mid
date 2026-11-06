@@ -44,8 +44,10 @@ describe('ActaInicioService', () => {
   beforeEach(async () => {
     serviciosMock.reiniciar();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ envFilePath: '.env' })],
-      providers: [ActaInicioService],
+      providers: [
+        ActaInicioService,
+        { provide: ConfigService, useValue: { get: jest.fn() } },
+      ],
     }).compile();
 
     service = module.get<ActaInicioService>(ActaInicioService);

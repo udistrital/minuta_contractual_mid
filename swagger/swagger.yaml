@@ -34,6 +34,9 @@ paths:
   /acta-inicio/contratos/{id}:
     get:
       operationId: ActaInicioController_obtenerPrecarga
+  /acta-poliza/contratos/{id}:
+    get:
+      operationId: ActaPolizaController_obtenerActaPoliza
       parameters:
         - name: id
           required: true
@@ -49,6 +52,20 @@ paths:
         - ActaInicio
     post:
       operationId: ActaInicioController_generar
+        '400':
+          description: Póliza inconsistente
+        '404':
+          description: Recurso no encontrado
+        '500':
+          description: Error interno del servidor
+        '502':
+          description: Servicio dependiente no disponible
+      summary: Generación del acta de aprobación de póliza en PDF (base64)
+      tags: &ref_0
+        - ActaPoliza
+  /acta-poliza/contratos/{id}/borrador:
+    post:
+      operationId: ActaPolizaController_obtenerBorradorActaPoliza
       parameters:
         - name: id
           required: true
@@ -132,6 +149,25 @@ paths:
           description: ''
       summary: Borra las actas, documentos y estados simulados
       tags: *ref_1
+              example:
+                amparos:
+                  - id: 1
+                    valor: 5000000
+                    fecha_inicio: '2024-01-15'
+                    fecha_fin: '2025-01-15'
+      responses:
+        '200':
+          description: Borrador generado correctamente
+        '400':
+          description: Póliza inconsistente
+        '404':
+          description: Recurso no encontrado
+        '502':
+          description: Servicio dependiente no disponible
+      summary: >-
+        Borrador del acta de aprobación de póliza en PDF (base64), con amparos
+        aún sin registrar
+      tags: *ref_0
 info:
   title: Minuta Contractual MID
   description: API

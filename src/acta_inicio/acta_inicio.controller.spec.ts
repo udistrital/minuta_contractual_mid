@@ -11,7 +11,10 @@ describe('ActaInicioController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ActaInicioController],
-      providers: [ActaInicioService, ConfigService],
+      providers: [
+        ActaInicioService,
+        { provide: ConfigService, useValue: { get: jest.fn() } },
+      ],
     }).compile();
 
     controller = module.get<ActaInicioController>(ActaInicioController);
