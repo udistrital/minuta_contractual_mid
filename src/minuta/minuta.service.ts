@@ -12,13 +12,12 @@ export const MARCADOR_FALTANTE = 'XXXXXXX';
 
 // Datos sin los cuales no se genera la minuta: si falta alguno se responde 422
 // sin documento. El representante no es obligatorio (persona natural). La
-// plantilla no configurada responde antes con 404.
+// plantilla no se valida aquí: si no está configurada se responde antes 404.
 export const CAMPOS_OBLIGATORIOS_MINUTA = [
   'contratista',
   'ordenador',
   'vigencia',
   'clausulas',
-  'plantilla',
 ] as const;
 
 export type CampoObligatorioMinuta =
@@ -157,7 +156,6 @@ export class MinutaService {
         ordenador: Boolean(ordenador),
         vigencia: Boolean(vigencia),
         clausulas: Array.isArray(clausulas) && clausulas.length > 0,
-        plantilla: Boolean(plantilla_id),
       });
       if (faltantes.length > 0) {
         return this.respuesta(

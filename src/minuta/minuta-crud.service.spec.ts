@@ -350,13 +350,12 @@ describe('MinutaService con el CRUD de gestión contractual', () => {
   });
 
   describe('422: datos obligatorios', () => {
-    it('la lista de obligatorios es contratista, ordenador, vigencia, cláusulas y plantilla', () => {
+    it('la lista de obligatorios es contratista, ordenador, vigencia y cláusulas (sin plantilla)', () => {
       expect([...CAMPOS_OBLIGATORIOS_MINUTA]).toEqual([
         'contratista',
         'ordenador',
         'vigencia',
         'clausulas',
-        'plantilla',
       ]);
     });
 
