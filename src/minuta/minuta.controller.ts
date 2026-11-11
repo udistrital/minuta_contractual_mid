@@ -1,7 +1,7 @@
 import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { MinutaService } from './minuta.service';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { RespuestaMinutaDto } from './dto/respuesta-minuta.dto';
 
 @Controller('minutas')
@@ -13,16 +13,14 @@ export class MinutaController {
   @ApiParam({
     name: 'id',
     type: 'number',
-    description: 'Id del contrato general',
+    description: 'Id del contrato general (entero positivo)',
     required: true,
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Solicitud procesada correctamente',
+  @ApiOkResponse({
+    type: RespuestaMinutaDto,
+    description:
+      'Siempre HTTP 200. El resultado va en Status del cuerpo (200, 400, 404, 422, 502 o 500) y Data solo trae el PDF cuando Status es 200.',
   })
-  @ApiResponse({ status: 400, description: 'Solicitud incorrecta' })
-  @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
-  @ApiResponse({ status: 500, description: 'Error interno del servidor' })
   async obtenerMinuta(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,

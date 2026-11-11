@@ -23,7 +23,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Id del contrato general",
+            "description": "Id del contrato general (entero positivo)",
             "schema": {
               "type": "number"
             }
@@ -31,16 +31,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Solicitud procesada correctamente"
-          },
-          "400": {
-            "description": "Solicitud incorrecta"
-          },
-          "404": {
-            "description": "Recurso no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor"
+            "description": "Siempre HTTP 200. El resultado va en Status del cuerpo (200, 400, 404, 422, 502 o 500) y Data solo trae el PDF cuando Status es 200.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
           }
         },
         "summary": "Generación de minuta en PDF (base64)",
@@ -154,6 +152,45 @@
   ],
   "servers": [],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "RespuestaMinutaDto": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "type": "boolean",
+            "example": true,
+            "description": "true solo cuando Status es 200"
+          },
+          "Status": {
+            "type": "number",
+            "example": 200,
+            "enum": [
+              200,
+              400,
+              404,
+              422,
+              500,
+              502
+            ],
+            "description": "Resultado: 200 minuta generada; 400 id inválido; 404 contrato o plantilla no encontrados; 422 faltan datos obligatorios; 502 servicio no disponible; 500 error inesperado"
+          },
+          "Message": {
+            "type": "string",
+            "example": "Minuta generada exitosamente",
+            "description": "Mensaje del resultado. En 422: \"Faltan datos: <lista>\"; en 502: \"Servicio no disponible: <servicio>\""
+          },
+          "Data": {
+            "type": "string",
+            "example": "JVBERi0xLjcK...",
+            "description": "PDF de la minuta en base64; solo viene con Status 200"
+          }
+        },
+        "required": [
+          "Success",
+          "Status",
+          "Message"
+        ]
+      }
+    }
   }
 }
