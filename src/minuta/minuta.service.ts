@@ -62,7 +62,7 @@ export class MinutaService {
         await Promise.all([
           this.obtenerVigencia(contratoMid.vigencia_id),
           this.obtenerOrdenadorArgoId(idContrato),
-          this.obtenerPlantillaClausulas(9512),
+          this.obtenerPlantillaClausulas(idContrato),
           this.obtenerEspecificaciones(contratoMid),
         ]);
       const [contratista, ordenador] = await Promise.all([
