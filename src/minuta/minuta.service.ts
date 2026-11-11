@@ -1,8 +1,12 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { plantillas } from './conf';
+import { plantillas, RECURSOS_CRUD } from './conf';
 import { environment } from 'src/environments/environment';
 import axios from 'axios';
+
+// Marcador de los datos que todavía no existen (por ejemplo, el número de
+// contrato antes de quedar suscrito).
+export const MARCADOR_FALTANTE = 'XXXXXXX';
 
 @Injectable()
 export class MinutaService {
@@ -54,20 +58,21 @@ export class MinutaService {
       }
 
       // Datos iniciales
-      const [documentoProveedor, ordenadorArgoId, clausulas, especificaciones] =
+      const [vigencia, ordenadorArgoId, clausulas, especificaciones] =
         await Promise.all([
-          this.obtenerDocumento(idContrato),
+          this.obtenerVigencia(contratoMid.vigencia_id),
           this.obtenerOrdenadorArgoId(idContrato),
           this.obtenerPlantillaClausulas(9512),
           this.obtenerEspecificaciones(contratoMid),
         ]);
       const [contratista, ordenador] = await Promise.all([
-        this.obtenerContratista(documentoProveedor),
+        this.obtenerContratista(contratoMid.proveedor_numero_documento),
         this.obtenerOrdenador(ordenadorArgoId),
       ]);
       const amparos = contratoMid.aplica_poliza ? this.obtenerAmparos() : null;
       const datosIniciales = await this.obtenerDatosIniciales({
         contratoMid,
+        vigencia,
         contratista,
         ordenador,
         especificaciones,
@@ -113,11 +118,13 @@ export class MinutaService {
   private async obtenerDatosIniciales(data: any) {
     // Desestructuración
     const {
-      vigencia,
+      numero_contrato,
+      justificacion,
       modalidad_seleccion,
       fecha_suscripcion_estudios,
       perfil_contratista,
     } = data.contratoMid || {};
+    const vigencia = data.vigencia;
 
     const { proveedor, representante } = data.contratista || {};
     const {
@@ -137,7 +144,7 @@ export class MinutaService {
 
     // Combinacion de los datos
     let datos: any = {
-      contrato_numero: 'XXXXXXX', // Valor faltante
+      contrato_numero: numero_contrato || MARCADOR_FALTANTE,
       vigencia: vigencia || 'XXXXXXX',
       ordenador_nombre: nombre_ordenador || 'XXXXXXX',
       ordenador_cedula: documento || 'XXXXXXX',
@@ -148,7 +155,7 @@ export class MinutaService {
       contratista_tipo_persona: tipo_persona || 'XXXXXXX',
       contratista_numero_documento: numero_documento || 'XXXXXXX',
       contratista_lugar_exp: ciudad_expedicion_documento || 'XXXXXXX',
-      justificacion: 'XXXXXXX', // Valor faltante
+      justificacion: justificacion || 'XXXXXXX',
       modalidad_seleccion_tipo: modalidad_seleccion || 'XXXXXXX',
       fecha_suscripcion_estudios: fecha_suscripcion_estudios || 'XXXXXXX',
       perfil_profesional: this.esPerfilProfesional(perfil_contratista),
@@ -255,11 +262,12 @@ export class MinutaService {
     return this.fetchData(url);
   }
 
-  // Número de documento del contratista asociado a un contrato general
-  private async obtenerDocumento(idContrato: number): Promise<any> {
-    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}contratistas/contrato/${idContrato}`;
+  // Año de la vigencia: el contrato guarda el Id del parámetro (tipo 121)
+  private async obtenerVigencia(vigenciaId: number): Promise<string | null> {
+    if (!vigenciaId) return null;
+    const url = `${this.configService.get<string>('PARAMETROS_CRUD')}parametro/${vigenciaId}`;
     const data = await this.fetchData(url);
-    return data?.numero_documento;
+    return data?.Nombre ?? null;
   }
 
   // Información del contratista (Persona natural) o contratista y representante (Persona juridica)
@@ -269,10 +277,12 @@ export class MinutaService {
   }
 
   // Id de argo del ordenador asociado a un contrato general
+  // (el registro activo más reciente; un arreglo vacío es que no hay ordenador)
   private async obtenerOrdenadorArgoId(idContrato: number) {
-    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}ordenador-contrato/contrato/${idContrato}`;
+    const query = `query=contrato_general_id.id:${idContrato},activo:true&sortby=fecha_creacion,id&order=desc&limit=1`;
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}${RECURSOS_CRUD.ordenador}/?${query}`;
     const data = await this.fetchData(url);
-    return data?.ordenador_argo_id;
+    return Array.isArray(data) ? data[0]?.ordenador_argo_id : undefined;
   }
 
   // Información del ordenador (Argo)
@@ -295,9 +305,9 @@ export class MinutaService {
 
   // Lista de especificaciones técnicas asociadas al id de un contrato general
   private async obtenerEspecificacionesTecnicas(idContrato: number) {
-    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}especificaciones-tecnicas`;
-    const base = `limit=0&query={"activo":true,"contrato_general_id":${idContrato}}`;
-    return this.fetchData(`${url}?${base}`);
+    const query = `query=contrato_general_id.id:${idContrato},activo:true&limit=0`;
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}${RECURSOS_CRUD.especificacionTecnica}/?${query}`;
+    return this.fetchData(url);
   }
 
   // Generación de HTML con datos iniciales
