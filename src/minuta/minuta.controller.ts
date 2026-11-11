@@ -1,6 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { MinutaService } from './minuta.service';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { RespuestaMinutaDto } from './dto/respuesta-minuta.dto';
 
 @Controller('minutas')
 export class MinutaController {
@@ -21,7 +23,15 @@ export class MinutaController {
   @ApiResponse({ status: 400, description: 'Solicitud incorrecta' })
   @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor' })
-  async obtenerMinuta(@Param('id') id: number) {
-    return await this.minutaService.obtenerMinuta(id);
+  async obtenerMinuta(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<RespuestaMinutaDto> {
+    const respuesta = await this.minutaService.obtenerMinuta(id);
+    // Único punto donde se fija el código HTTP. Por compatibilidad responde
+    // siempre 200 y el resultado va en Status; para responder el código real,
+    // usar respuesta.Status.
+    res.status(HttpStatus.OK);
+    return respuesta;
   }
 }
