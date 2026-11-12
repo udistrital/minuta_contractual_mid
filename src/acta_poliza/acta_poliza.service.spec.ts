@@ -17,6 +17,7 @@ const contrato = {
   unidad_ejecucion_id: 180,
   unidad_ejecutora_id: 6818,
   tipo_contrato_id: 6537,
+  proveedor_numero_documento: '1012345678',
 };
 const polizaOk = {
   id: 5,
@@ -37,7 +38,7 @@ const amparoOk = {
 
 // Enruta cada GET según la URL; los POST devuelven html y luego pdf
 // `opciones.caidos`: fragmentos de URL cuyo servicio simula estar caído
-// `opciones.sinDocumento`: el contrato no tiene contratista registrado
+// `opciones.sinDocumento`: el contrato no tiene proveedor_numero_documento
 // `opciones.proveedor`: respuesta de proveedores_mid (por defecto, un contratista)
 function mockServicios(
   poliza: any,
@@ -47,11 +48,12 @@ function mockServicios(
   mockedAxios.get.mockImplementation(async (url: string) => {
     if (opciones.caidos?.some((fragmento) => url.includes(fragmento)))
       throw new Error('ECONNREFUSED');
-    if (url.includes('contratos-generales/')) return ok(contrato);
-    if (url.includes('contratistas/contrato/'))
-      return opciones.sinDocumento
-        ? { data: { Success: false, Status: 404, Message: 'no encontrado' } }
-        : ok({ numero_documento: 123 });
+    if (url.includes('contratos-generales/'))
+      return ok(
+        opciones.sinDocumento
+          ? { ...contrato, proveedor_numero_documento: null }
+          : contrato,
+      );
     if (url.includes('parametro/'))
       return {
         data: { Success: true, Status: '200', Data: { Nombre: 'MESES' } },
@@ -118,6 +120,15 @@ describe('ActaPolizaService', () => {
     const urls = mockedAxios.get.mock.calls.map((c) => c[0] as string);
     const urlPoliza = urls.find((u) => u.includes('polizas?query'));
     expect(urlPoliza).toContain('GESTION_CONTRACTUAL_MID');
+  });
+
+  it('toma el documento del contratista del contrato (CRUD Beego), sin contratistas/contrato', async () => {
+    mockServicios(polizaOk, [amparoOk]);
+    const res = await service.obtenerActaPoliza(10);
+    expect(res.Status).toBe(HttpStatus.OK);
+    const urls = mockedAxios.get.mock.calls.map((c) => c[0] as string);
+    expect(urls).toContain('http://PROVEEDORES_MID/contratistas?id=1012345678');
+    expect(urls.some((u) => u.includes('contratistas/contrato/'))).toBe(false);
   });
 
   it('404 si el contrato no tiene contratista', async () => {
