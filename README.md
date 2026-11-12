@@ -33,9 +33,9 @@ Genera la minuta del contrato en PDF (base64) con la plantilla de su unidad ejec
 | --- | --- | --- |
 | GET | `/minutas/contratos/:id` | Minuta del contrato general `id`. |
 
-La respuesta siempre es HTTP 200 con el sobre `{ "Success", "Status", "Message", "Data" }`. El resultado va en `Status` y `Data` solo viene con el PDF:
+La respuesta tiene el sobre `{ "Success", "Status", "Message", "Data" }` y el código HTTP es igual a `Status`. `Data` solo viene con el PDF:
 
-| Status | Success | Cuándo | Data |
+| HTTP y Status | Success | Cuándo | Data |
 | --- | --- | --- | --- |
 | `200` | `true` | Minuta generada. Si el contrato aún no tiene número, se muestra `XXXXXXX`. | PDF en base64 |
 | `400` | `false` | El id no es un entero positivo. | — |

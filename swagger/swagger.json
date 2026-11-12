@@ -31,7 +31,57 @@
         ],
         "responses": {
           "200": {
-            "description": "Siempre HTTP 200. El resultado va en Status del cuerpo (200, 400, 404, 422, 502 o 500) y Data solo trae el PDF cuando Status es 200.",
+            "description": "Minuta generada: Data trae el PDF en base64",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El id del contrato no es un entero positivo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contrato general no encontrado, o plantilla no configurada para su unidad ejecutora y tipo de contrato",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Faltan datos obligatorios (contratista, ordenador, vigencia o cláusulas): \"Faltan datos: <lista>\"",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error inesperado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RespuestaMinutaDto"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Un servicio no respondió o respondió con error: \"Servicio no disponible: <servicio>\"",
             "content": {
               "application/json": {
                 "schema": {
