@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import { ActaPolizaService } from './acta_poliza.service';
+import { MARCADOR_FALTANTE } from '../minuta/minuta.service';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -43,17 +44,24 @@ const amparoOk = {
 function mockServicios(
   poliza: any,
   amparos: any[],
-  opciones: { caidos?: string[]; sinDocumento?: boolean; proveedor?: any } = {},
+  opciones: {
+    caidos?: string[];
+    sinDocumento?: boolean;
+    proveedor?: any;
+    contrato?: any;
+  } = {},
 ) {
   mockedAxios.get.mockImplementation(async (url: string) => {
     if (opciones.caidos?.some((fragmento) => url.includes(fragmento)))
       throw new Error('ECONNREFUSED');
-    if (url.includes('contratos-generales/'))
+    if (url.includes('contratos-generales/')) {
+      const base = opciones.contrato ?? contrato;
       return ok(
         opciones.sinDocumento
-          ? { ...contrato, proveedor_numero_documento: null }
-          : contrato,
+          ? { ...base, proveedor_numero_documento: null }
+          : base,
       );
+    }
     if (url.includes('parametro/'))
       return {
         data: { Success: true, Status: '200', Data: { Nombre: 'MESES' } },
@@ -104,6 +112,25 @@ describe('ActaPolizaService', () => {
     expect(bodyHtml.data.entidad_aseguradora).toBe('Seguros del Estado');
     expect(bodyHtml.data.amparos).toHaveLength(1);
     expect(bodyHtml.data.plazo_ejecucion).toBe('6 Mes(es)');
+  });
+
+  it('envía el número del contrato, no su id', async () => {
+    mockServicios(polizaOk, [amparoOk], {
+      contrato: { ...contrato, numero_contrato: 'CPS-2026-010' },
+    });
+    await service.obtenerActaPoliza(10);
+    const bodyHtml = mockedAxios.post.mock.calls[0][1] as any;
+    expect(bodyHtml.data.numero_contrato).toBe('CPS-2026-010');
+  });
+
+  it('sin número de contrato (antes de suscribir) usa el marcador de la minuta', async () => {
+    mockServicios(polizaOk, [amparoOk], {
+      contrato: { ...contrato, numero_contrato: null },
+    });
+    await service.obtenerActaPoliza(10);
+    const bodyHtml = mockedAxios.post.mock.calls[0][1] as any;
+    expect(bodyHtml.data.numero_contrato).toBe(MARCADOR_FALTANTE);
+    expect(bodyHtml.data.numero_contrato).not.toBe(10);
   });
 
   it('incluye contratista y objeto del contrato en los datos de la plantilla', async () => {

@@ -1,6 +1,7 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plantillas } from './conf';
+import { MARCADOR_FALTANTE } from '../minuta/minuta.service';
 import axios from 'axios';
 
 // Fila de amparo tal como la edita el usuario antes de registrar la póliza
@@ -200,7 +201,8 @@ export class ActaPolizaService {
     const dia = fechaActa.getUTCDate();
 
     return {
-      numero_contrato: contrato.id || 'XXXXXXX',
+      // Número del contrato (se asigna al quedar suscrito); antes se enviaba el id
+      numero_contrato: contrato.numero_contrato || MARCADOR_FALTANTE,
       fecha_suscripcion: contrato.fecha_suscripcion || 'XXXXXXX',
       nombre_contratista:
         contratista?.proveedor?.nombre_completo_proveedor || 'XXXXXXX',
