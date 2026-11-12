@@ -1,6 +1,7 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plantillas } from './conf';
+import { MARCADOR_FALTANTE } from '../minuta/minuta.service';
 import axios from 'axios';
 
 // Fila de amparo tal como la edita el usuario antes de registrar la póliza
@@ -65,10 +66,7 @@ export class ActaPolizaService {
   async obtenerActaPoliza(idContrato: number, borrador?: FilaAmparoBorrador[]) {
     try {
       // Datos necesarios
-      const [contratoCrud, documentoProveedor] = await Promise.all([
-        this.obtenerContratoGeneralCrud(idContrato),
-        this.obtenerDocumento(idContrato),
-      ]);
+      const contratoCrud = await this.obtenerContratoGeneralCrud(idContrato);
 
       if (!contratoCrud) {
         return {
@@ -113,7 +111,9 @@ export class ActaPolizaService {
         };
       }
 
-      // Contratista y unidad del plazo de ejecución
+      // Contratista y unidad del plazo de ejecución. En el CRUD Beego el
+      // documento del contratista está en el contrato (proveedor_numero_documento).
+      const documentoProveedor = contratoCrud.proveedor_numero_documento;
       if (!documentoProveedor) {
         return {
           Success: false,
@@ -201,7 +201,8 @@ export class ActaPolizaService {
     const dia = fechaActa.getUTCDate();
 
     return {
-      numero_contrato: contrato.id || 'XXXXXXX',
+      // Número del contrato (se asigna al quedar suscrito); antes se enviaba el id
+      numero_contrato: contrato.numero_contrato || MARCADOR_FALTANTE,
       fecha_suscripcion: contrato.fecha_suscripcion || 'XXXXXXX',
       nombre_contratista:
         contratista?.proveedor?.nombre_completo_proveedor || 'XXXXXXX',
@@ -370,16 +371,6 @@ export class ActaPolizaService {
     return this.fetchData(url, 'gestion_contractual_crud (contrato)');
   }
 
-  // Número de documento del contratista asociado a un contrato general
-  private async obtenerDocumento(idContrato: number): Promise<any> {
-    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}contratistas/contrato/${idContrato}`;
-    const data = await this.fetchData(
-      url,
-      'gestion_contractual_crud (contratista)',
-    );
-    return data?.numero_documento;
-  }
-
   // Nombre de la unidad del plazo de ejecución (parámetro: DIAS, MESES, AÑOS...)
   private async obtenerUnidadEjecucion(
     unidadEjecucionId: number,
@@ -427,7 +418,7 @@ export class ActaPolizaService {
   }
 
   // Información del contratista (Persona natural) o contratista y representante (Persona juridica)
-  private async obtenerContratista(documentoContratista: number) {
+  private async obtenerContratista(documentoContratista: string) {
     const url = `${this.configService.get<string>('PROVEEDORES_MID')}contratistas?id=${documentoContratista}`;
     return this.fetchData(url, 'proveedores_mid (contratista)');
   }

@@ -23,6 +23,28 @@ PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
 Nota: Las URLs de los servicios deben terminar en `/`.
+Nota: `GESTION_CONTRACTUAL_CRUD` incluye el prefijo de versión del CRUD, por ejemplo `https://<host>/gestion_contractual_crud/v1/`; las rutas del código no lo repiten.
+
+### Minuta
+
+Genera la minuta del contrato en PDF (base64) con la plantilla de su unidad ejecutora y tipo de contrato.
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/minutas/contratos/:id` | Minuta del contrato general `id`. |
+
+La respuesta siempre es HTTP 200 con el sobre `{ "Success", "Status", "Message", "Data" }`. El resultado va en `Status` y `Data` solo viene con el PDF:
+
+| Status | Success | Cuándo | Data |
+| --- | --- | --- | --- |
+| `200` | `true` | Minuta generada. Si el contrato aún no tiene número, se muestra `XXXXXXX`. | PDF en base64 |
+| `400` | `false` | El id no es un entero positivo. | — |
+| `404` | `false` | El contrato no existe o no hay plantilla configurada para su unidad ejecutora y tipo de contrato. | — |
+| `422` | `false` | Falta un dato obligatorio: contratista, ordenador, vigencia o cláusulas. `Message`: `Faltan datos: <lista>`. | — |
+| `502` | `false` | Un servicio no respondió o respondió con error. `Message`: `Servicio no disponible: <servicio>`; en el renderizador indica el paso (1: HTML, 2: PDF). | — |
+| `500` | `false` | Error inesperado. | — |
+
+Servicios que consume: `GESTION_CONTRACTUAL_MID` (contrato con `?ids=true`), `GESTION_CONTRACTUAL_CRUD` (`ordenadores/` y `especificaciones-tecnicas/`), `PARAMETROS_CRUD` (año de la vigencia), `PROVEEDORES_MID` (contratista y representante), `ORDENADORES_SUPERVISORES_CONTRATACION_MID` (ordenador), `CLAUSULAS_PARAGRAFOS_CRUD` (cláusulas del contrato) y `PLANTILLAS_MID` (renderizado a HTML y luego a PDF).
 
 ### Acta de aprobación de póliza
 
@@ -59,7 +81,7 @@ Nota: Para otras plataformas de PNPM consultar la [documentación oficial](https
 
 ### Swagger
 ```shell
-http://localhost:3000/api
+http://localhost:8080/swagger
 ```
 
 ### Ejecución Dockerfile
