@@ -55,7 +55,9 @@ Genera el acta de aprobación de póliza en PDF (base64) a partir de la plantill
 | GET | `/acta-poliza/contratos/:id` | Acta con la póliza y los amparos ya registrados para el contrato. |
 | POST | `/acta-poliza/contratos/:id/borrador` | Borrador con los amparos tal como están en pantalla (aún sin registrar). Body: `{ "amparos": [{ "id", "valor", "fecha_inicio", "fecha_fin" }] }`. |
 
-Respuestas: `200` PDF generado, `400` póliza inconsistente (sin número, aseguradora, vigencia, expedición, amparos, o con vigencias inválidas), `404` contrato, póliza, contratista o plantilla no encontrados, `502` un servicio del que depende no respondió.
+Respuestas (en `Status`): `200` PDF generado, `400` póliza inconsistente (sin número, aseguradora, vigencia, expedición, amparos, o con vigencias inválidas), `404` contrato, póliza, contratista o plantilla no encontrados, `502` un servicio del que depende no respondió.
+
+**Diferencia conocida con la minuta:** el acta conserva su respuesta actual. El código HTTP no cambia con el resultado (el GET responde `200` y el POST del borrador `201`, el valor por defecto de NestJS) y el resultado va solo en `Status`, porque su consumidor en el MF revisa `Success` y se rompería con un 4xx. La minuta, en cambio, responde con el código HTTP igual a `Status`.
 
 Servicios que consume: `GESTION_CONTRACTUAL_CRUD` (contrato y contratista), `GESTION_CONTRACTUAL_MID` (póliza y amparos), `PROVEEDORES_MID` (datos del contratista), `PARAMETROS_CRUD` (unidad del plazo de ejecución) y `PLANTILLAS_MID` (renderizado de la plantilla a HTML y luego a PDF).
 
