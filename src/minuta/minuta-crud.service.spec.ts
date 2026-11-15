@@ -359,6 +359,33 @@ describe('MinutaService con el CRUD de gestión contractual', () => {
       ]);
     });
 
+    it.each([
+      ['[] (sin cláusulas guardadas)', () => ok([])],
+      [
+        '404 (sin documento de cláusulas)',
+        () => {
+          throw noEncontrado();
+        },
+      ],
+    ])(
+      'contrato sin cláusulas propias, %s: 422 y no consulta las del tipo de contrato',
+      async (_, respuesta) => {
+        rutasGet[URL.clausulas(1)] = respuesta;
+        const r = await service.obtenerMinuta(1);
+
+        expect(r).toEqual({
+          Success: false,
+          Status: 422,
+          Message: 'Faltan datos: clausulas',
+        });
+        const urls = get.mock.calls.map(([url]) => url as string);
+        expect(urls.some((u) => u.includes('plantilla-tipo-contratos'))).toBe(
+          false,
+        );
+        expect(post).not.toHaveBeenCalled();
+      },
+    );
+
     it('sin ordenador registrado ([] en el CRUD) no genera el documento', async () => {
       rutasGet[URL.ordenador(1)] = () => ok([]);
       const r = await service.obtenerMinuta(1);
