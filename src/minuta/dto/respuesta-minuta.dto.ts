@@ -19,7 +19,7 @@ export class RespuestaMinutaDto {
   @ApiProperty({
     example: 'Minuta generada exitosamente',
     description:
-      'Mensaje del resultado. En 422: "Faltan datos: <lista>"; en 502: "Servicio no disponible: <servicio>"',
+      'Mensaje del resultado. En 422: "Faltan datos: " y la lista de faltantes; en 502: "Servicio no disponible: " y el servicio',
   })
   Message: string;
 

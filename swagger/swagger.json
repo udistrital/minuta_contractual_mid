@@ -36,6 +36,12 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": true,
+                  "Status": 200,
+                  "Message": "Minuta generada exitosamente",
+                  "Data": "JVBERi0xLjcK..."
                 }
               }
             }
@@ -46,6 +52,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": false,
+                  "Status": 400,
+                  "Message": "El id del contrato debe ser un entero positivo"
                 }
               }
             }
@@ -56,16 +67,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": false,
+                  "Status": 404,
+                  "Message": "Contrato general no encontrado"
                 }
               }
             }
           },
           "422": {
-            "description": "Faltan datos obligatorios (contratista, ordenador, vigencia o cláusulas): \"Faltan datos: <lista>\"",
+            "description": "Faltan datos obligatorios (contratista, ordenador, vigencia o cláusulas): \"Faltan datos: \" y la lista",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": false,
+                  "Status": 422,
+                  "Message": "Faltan datos: ordenador"
                 }
               }
             }
@@ -76,16 +97,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": false,
+                  "Status": 500,
+                  "Message": "Error al generar la minuta"
                 }
               }
             }
           },
           "502": {
-            "description": "Un servicio no respondió o respondió con error: \"Servicio no disponible: <servicio>\"",
+            "description": "Un servicio no respondió o respondió con error: \"Servicio no disponible: \" y el servicio",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaMinutaDto"
+                },
+                "example": {
+                  "Success": false,
+                  "Status": 502,
+                  "Message": "Servicio no disponible: plantillas_mid (paso 1: HTML)"
                 }
               }
             }
@@ -227,7 +258,7 @@
           "Message": {
             "type": "string",
             "example": "Minuta generada exitosamente",
-            "description": "Mensaje del resultado. En 422: \"Faltan datos: <lista>\"; en 502: \"Servicio no disponible: <servicio>\""
+            "description": "Mensaje del resultado. En 422: \"Faltan datos: \" y la lista de faltantes; en 502: \"Servicio no disponible: \" y el servicio"
           },
           "Data": {
             "type": "string",

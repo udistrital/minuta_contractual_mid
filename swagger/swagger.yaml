@@ -26,12 +26,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: true
+                Status: 200
+                Message: Minuta generada exitosamente
+                Data: JVBERi0xLjcK...
         '400':
           description: El id del contrato no es un entero positivo
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: false
+                Status: 400
+                Message: El id del contrato debe ser un entero positivo
         '404':
           description: >-
             Contrato general no encontrado, o plantilla no configurada para su
@@ -40,28 +49,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: false
+                Status: 404
+                Message: Contrato general no encontrado
         '422':
           description: >-
             Faltan datos obligatorios (contratista, ordenador, vigencia o
-            cláusulas): "Faltan datos: <lista>"
+            cláusulas): "Faltan datos: " y la lista
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: false
+                Status: 422
+                Message: 'Faltan datos: ordenador'
         '500':
           description: Error inesperado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: false
+                Status: 500
+                Message: Error al generar la minuta
         '502':
           description: >-
             Un servicio no respondió o respondió con error: "Servicio no
-            disponible: <servicio>"
+            disponible: " y el servicio
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RespuestaMinutaDto'
+              example:
+                Success: false
+                Status: 502
+                Message: 'Servicio no disponible: plantillas_mid (paso 1: HTML)'
       summary: Generación de minuta en PDF (base64)
       tags:
         - Minuta
@@ -159,8 +184,8 @@ components:
           type: string
           example: Minuta generada exitosamente
           description: >-
-            Mensaje del resultado. En 422: "Faltan datos: <lista>"; en 502:
-            "Servicio no disponible: <servicio>"
+            Mensaje del resultado. En 422: "Faltan datos: " y la lista de
+            faltantes; en 502: "Servicio no disponible: " y el servicio
         Data:
           type: string
           example: JVBERi0xLjcK...
