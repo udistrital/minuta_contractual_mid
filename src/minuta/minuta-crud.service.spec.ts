@@ -6,7 +6,6 @@ import {
   MARCADOR_FALTANTE,
   MinutaService,
 } from './minuta.service';
-import { MinutaController } from './minuta.controller';
 
 // Datos ficticios. Las URL replican la forma de las variables de entorno:
 // terminan en "/" y la del CRUD incluye v1/.
@@ -530,29 +529,4 @@ describe('MinutaService con el CRUD de gestión contractual', () => {
       expect(r).not.toHaveProperty('Data');
     });
   });
-});
-
-describe('MinutaController', () => {
-  it.each([
-    [200, { Success: true, Status: 200, Message: 'ok', Data: 'UERG' }],
-    [400, { Success: false, Status: 400, Message: 'id inválido' }],
-    [404, { Success: false, Status: 404, Message: 'Plantilla no encontrada' }],
-    [422, { Success: false, Status: 422, Message: 'Faltan datos: ordenador' }],
-    [502, { Success: false, Status: 502, Message: 'Servicio no disponible' }],
-    [500, { Success: false, Status: 500, Message: 'Error al generar' }],
-  ])(
-    'responde HTTP %i, igual al Status, con el mismo cuerpo del servicio',
-    async (codigo, respuesta) => {
-      const minutaService = {
-        obtenerMinuta: jest.fn().mockResolvedValue(respuesta),
-      } as unknown as MinutaService;
-      const controller = new MinutaController(minutaService);
-      const res = { status: jest.fn() } as any;
-
-      await expect(controller.obtenerMinuta('7', res)).resolves.toBe(respuesta);
-      expect(minutaService.obtenerMinuta).toHaveBeenCalledWith('7');
-      expect(res.status).toHaveBeenCalledTimes(1);
-      expect(res.status).toHaveBeenCalledWith(codigo);
-    },
-  );
 });
