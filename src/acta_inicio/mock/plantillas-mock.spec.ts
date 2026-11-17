@@ -1,6 +1,6 @@
 import {
-  definirDocumentoMock,
   obtenerPlantillaDeHtml,
+  PDF_MOCK,
   PLANTILLAS_ACTA,
   renderizarHtmlMock,
 } from './plantillas-mock';
@@ -20,29 +20,9 @@ describe('plantillas-mock', () => {
     expect(obtenerPlantillaDeHtml('<html></html>')).toBeNull();
   });
 
-  it('usa el título genérico y omite las tablas vacías', () => {
-    const documento: any = definirDocumentoMock('otra', {});
-    expect(documento.info.title).toBe('ACTA DE INICIO');
-    const obra: any = definirDocumentoMock(PLANTILLAS_ACTA.OBRA, {
-      numero_contrato: 'OBR-1',
-    });
-    expect(obra.info.title).toBe('ACTA DE INICIO CONTRATO DE OBRA OBR-1');
-  });
-
-  it('genera el PDF cuando pdfmake no trae export default', async () => {
-    jest.resetModules();
-    const PdfPrinter = jest.requireActual('pdfmake');
-    // Módulo que es directamente el constructor de la impresora
-    const Impresora: any = function (fuentes: any) {
-      return new PdfPrinter(fuentes);
-    };
-    Impresora.__esModule = true;
-    jest.doMock('pdfmake', () => Impresora);
-    const { generarPdfMock, definirDocumentoMock: definir } = await import(
-      './plantillas-mock'
+  it('el PDF simulado es un PDF válido en base64', () => {
+    expect(Buffer.from(PDF_MOCK, 'base64').subarray(0, 5).toString()).toBe(
+      '%PDF-',
     );
-    const pdf = await generarPdfMock(definir(PLANTILLAS_ACTA.OBRA, {}));
-    expect(Buffer.from(pdf, 'base64').subarray(0, 5).toString()).toBe('%PDF-');
-    jest.dontMock('pdfmake');
   });
 });

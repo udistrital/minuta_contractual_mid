@@ -7,19 +7,14 @@ import {
   PARAMETROS_MOCK,
   PROVEEDORES_SUPERVISORES_MOCK,
 } from './datos-mock';
-import {
-  definirDocumentoMock,
-  generarPdfMock,
-  obtenerPlantillaDeHtml,
-  renderizarHtmlMock,
-} from './plantillas-mock';
+import { PDF_MOCK, renderizarHtmlMock } from './plantillas-mock';
 
-// Respuestas simuladas del CRUD, los MID, Parámetros, Plantillas y el Gestor
-// Documental. Con ACTA_INICIO_MOCK=true se instalan como adaptador de axios, así
+// Respuestas simuladas del CRUD, los MID, Parámetros y Plantillas. Con
+// ACTA_INICIO_MOCK=true se instalan como adaptador de axios, así
 // el servicio del acta de inicio corre sin cambios. Lo que se genera (actas,
-// documentos, estados y archivos) queda en memoria hasta reiniciar.
+// documentos y estados) queda en memoria hasta reiniciar.
 // Si PLANTILLAS_MID tiene una URL, el PDF se pide al plantillas_mid real; si no
-// responde, se usa el render local.
+// responde, se usa el PDF simulado.
 
 export const SERVICIOS_MOCK = [
   'GESTION_CONTRACTUAL_CRUD',
@@ -27,7 +22,6 @@ export const SERVICIOS_MOCK = [
   'PROVEEDORES_MID',
   'PLANTILLAS_MID',
   'PARAMETROS_CRUD',
-  'GESTOR_DOCUMENTAL_MID',
 ];
 
 interface Ruta {
@@ -57,7 +51,6 @@ export class ServiciosMock {
   private estados: Record<number, any>;
   private actas: any[];
   private documentos: any[];
-  private archivos: Record<string, string>;
   private secuencia: number;
 
   // bases: URL base de cada servicio (clave de entorno -> URL)
@@ -74,7 +67,6 @@ export class ServiciosMock {
     );
     this.actas = [];
     this.documentos = [];
-    this.archivos = {};
     this.secuencia = 1000;
   }
 
@@ -92,7 +84,7 @@ export class ServiciosMock {
           return await adaptadorReal({ ...config, timeout: 20000 });
         } catch (error) {
           this.logger.warn(
-            `plantillas_mid no respondió (${error.message}); se usa el render local`,
+            `plantillas_mid no respondió (${error.message}); se usa el PDF simulado`,
           );
         }
       }
@@ -248,17 +240,7 @@ export class ServiciosMock {
       return estandar(renderizarHtmlMock(body.plantilla_id, body.data));
     }
     if (servicio === 'PLANTILLAS_MID' && ruta === 'plantilla/renderizar-pdf') {
-      const plantillaId = obtenerPlantillaDeHtml(body.html);
-      return estandar(
-        await generarPdfMock(definirDocumentoMock(plantillaId, body.data)),
-      );
-    }
-
-    if (servicio === 'GESTOR_DOCUMENTAL_MID' && ruta === 'document/upload') {
-      const id = this.secuencia++;
-      const enlace = `mock-${id}`;
-      this.archivos[enlace] = body[0].file;
-      return { Status: '200', res: { Id: id, Enlace: enlace } };
+      return estandar(PDF_MOCK);
     }
 
     if (servicio === 'GESTION_CONTRACTUAL_CRUD') {

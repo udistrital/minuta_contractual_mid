@@ -101,7 +101,7 @@
             "description": "Solicitud procesada correctamente"
           }
         },
-        "summary": "Genera el acta de inicio: PDF, gestor documental, registro del acta y contrato en ejecución",
+        "summary": "Genera el acta de inicio: PDF (base64), registro del acta y contrato en ejecución",
         "tags": [
           "ActaInicio"
         ]

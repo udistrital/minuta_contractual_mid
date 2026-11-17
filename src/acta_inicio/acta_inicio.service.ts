@@ -571,7 +571,7 @@ export class ActaInicioService {
         };
     }
 
-    // Genera el acta: PDF, gestor documental, registro del acta y contrato en ejecución
+    // Genera el acta: PDF (base64), registro del acta y contrato en ejecución
     async generarActaInicio(idContrato: number, entrada: GenerarActaInicioDto) {
         if (!environment.ROLES_ACTA_INICIO.includes(entrada.usuario_rol)) {
             return {
@@ -622,45 +622,38 @@ export class ActaInicioService {
             };
         }
 
-        const documento = await this.guardarEnGestorDocumental(idContrato, datos, pdf);
-        if (!documento) {
-            return {
-                Success: false,
-                Status: HttpStatus.BAD_GATEWAY,
-                Message: 'Error al guardar el acta de inicio en el gestor documental',
-            };
-        }
-
-        const [documentoContrato, actaInicio] = await Promise.all([
-            this.registrarDocumentoContrato(idContrato, documento),
-            this.guardarActaInicio(idContrato, data.actaInicio, datos, entrada),
-        ]);
+        const actaInicio = await this.guardarActaInicio(
+            idContrato,
+            data.actaInicio,
+            datos,
+            entrada,
+        );
         const estado = actaInicio
             ? await this.registrarEstado(idContrato, data.estadoActual, entrada)
             : null;
-        if (!documentoContrato || !actaInicio || !estado) {
+        if (!actaInicio || !estado) {
             return {
                 Success: false,
                 Status: HttpStatus.INTERNAL_SERVER_ERROR,
-                Message: 'El PDF se guardó, pero no se pudo registrar el acta de inicio',
-                Data: { documento, documentoContrato, actaInicio, estado },
+                Message: 'No se pudo registrar el acta de inicio',
+                Data: { actaInicio, estado },
             };
         }
 
+        // El cliente sube el PDF al gestor documental y lo registra en documentos-contratos
         return {
             Success: true,
             Status: HttpStatus.CREATED,
             Message: 'Acta de inicio generada exitosamente',
             Data: {
                 pdf,
-                documento: { id: documento.Id, enlace: documento.Enlace },
                 acta_inicio: actaInicio,
                 estado,
             },
         };
     }
 
-    // Acta de inicio registrada para un contrato y su documento en el gestor documental
+    // Acta de inicio registrada para un contrato y su documento en documentos-contratos
     async obtenerActaPorContrato(idContrato: number) {
         const [actaInicio, documentos, tipoDocumentoId] = await Promise.all([
             this.obtenerActaInicio(idContrato),
@@ -775,31 +768,6 @@ export class ActaInicioService {
             `parametro?query=${consulta}&limit=0`,
         );
         return parametros?.[0]?.Id ?? null;
-    }
-
-    // Guardar el PDF en el gestor documental (Nuxeo)
-    async guardarEnGestorDocumental(idContrato: number, datos: any, pdf: string) {
-        const respuesta = await this.enviar('post', 'GESTOR_DOCUMENTAL_MID', 'document/upload', [
-            {
-                IdTipoDocumento: environment.TIPO_DOCUMENTO_ID_GESTOR_DOCUMENTAL.ACTAS_DE_INICIO,
-                nombre: `ACTA DE INICIO ${datos.numero_contrato}`,
-                descripcion: `Acta de inicio, contrato general id ${idContrato}`,
-                metadatos: {},
-                file: pdf,
-            },
-        ]);
-        return respuesta?.Status === '200' && respuesta?.res?.Id ? respuesta.res : null;
-    }
-
-    // Registrar el documento del gestor documental en gestion_contractual_crud
-    async registrarDocumentoContrato(idContrato: number, documento: any) {
-        const tipo_documento_id = await this.obtenerTipoDocumentoActa();
-        return this.enviar('post', 'GESTION_CONTRACTUAL_CRUD', 'documentos-contratos', {
-            contrato_general_id: Number(idContrato),
-            documento_id: documento.Id,
-            documento_enlace: documento.Enlace,
-            ...(tipo_documento_id && { tipo_documento_id }),
-        });
     }
 
     // Registrar o actualizar el acta de inicio del contrato

@@ -49,7 +49,7 @@ export class ActaInicioController {
   @Post('contratos/:id')
   @ApiOperation({
     summary:
-      'Genera el acta de inicio: PDF, gestor documental, registro del acta y contrato en ejecución',
+      'Genera el acta de inicio: PDF (base64), registro del acta y contrato en ejecución',
   })
   @ApiParam({
     name: 'id',

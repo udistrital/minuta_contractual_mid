@@ -44,10 +44,8 @@ describe('ActaInicioService', () => {
   beforeEach(async () => {
     serviciosMock.reiniciar();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ActaInicioService,
-        { provide: ConfigService, useValue: { get: jest.fn() } },
-      ],
+      imports: [ConfigModule.forRoot({ envFilePath: '.env' })],
+      providers: [ActaInicioService],
     }).compile();
 
     service = module.get<ActaInicioService>(ActaInicioService);
@@ -161,9 +159,6 @@ describe('ActaInicioService', () => {
 
     const acta: any = await service.obtenerActaPorContrato(9003);
     expect(acta.Data.acta_inicio.contrato_general_id).toBe(9003);
-    expect(acta.Data.documento.documento_enlace).toBe(
-      respuesta.Data.documento.enlace,
-    );
 
     // Ya en ejecución no se puede volver a generar
     const otra: any = await service.generarActaInicio(9003, {

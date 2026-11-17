@@ -22,7 +22,6 @@ describe('ActaInicioService: errores y casos límite', () => {
         ORDENADORES_SUPERVISORES_CONTRATACION_MID: 'http://ordenadores/',
         PLANTILLAS_MID: 'http://plantillas/',
         PARAMETROS_CRUD: 'http://parametros/',
-        GESTOR_DOCUMENTAL_MID: 'http://gestor/',
       }),
     );
   });
@@ -149,17 +148,6 @@ describe('ActaInicioService: errores y casos límite', () => {
       expect(await service.obtenerDependencia(1, 2)).toBeNull();
       consultar.mockResolvedValue([{ id: 3, nombre: 'Otra' }]);
       expect(await service.obtenerDependencia(1, 2)).toBeNull();
-    });
-
-    it('el gestor documental debe responder el id del documento', async () => {
-      jest.spyOn(service, 'enviar').mockResolvedValue({ Status: '500' });
-      expect(
-        await service.guardarEnGestorDocumental(
-          1,
-          { numero_contrato: 'CPS-1' },
-          'pdf',
-        ),
-      ).toBeNull();
     });
   });
 
@@ -419,25 +407,12 @@ describe('ActaInicioService: errores y casos límite', () => {
       expect(pdf).not.toHaveBeenCalled();
     });
 
-    it('responde 502 si el gestor documental no guardó el PDF', async () => {
-      contratoValido();
-      jest.spyOn(service, 'guardarEnGestorDocumental').mockResolvedValue(null);
-      expect((await service.generarActaInicio(1, entrada)).Status).toBe(502);
-    });
-
     it('no cambia el estado si no se pudo registrar el acta', async () => {
       contratoValido();
-      jest
-        .spyOn(service, 'guardarEnGestorDocumental')
-        .mockResolvedValue({ Id: 1, Enlace: 'enlace' });
-      jest
-        .spyOn(service, 'registrarDocumentoContrato')
-        .mockResolvedValue({ id: 1 });
       jest.spyOn(service, 'guardarActaInicio').mockResolvedValue(null);
       const estado = jest.spyOn(service, 'registrarEstado');
       const respuesta: any = await service.generarActaInicio(1, entrada);
       expect(respuesta.Status).toBe(500);
-      expect(respuesta.Data.documento).toEqual({ Id: 1, Enlace: 'enlace' });
       expect(estado).not.toHaveBeenCalled();
     });
   });

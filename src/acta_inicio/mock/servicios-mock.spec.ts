@@ -10,7 +10,6 @@ describe('ServiciosMock', () => {
     PROVEEDORES_MID: 'http://proveedores/',
     PLANTILLAS_MID: 'http://plantillas/',
     PARAMETROS_CRUD: 'http://parametros/',
-    GESTOR_DOCUMENTAL_MID: 'http://gestor/',
   };
   let adapter: AxiosAdapter;
 
