@@ -3,7 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import axios from 'axios';
 import { ActaInicioMockModule } from './acta_inicio_mock.module';
 import { ActaInicioMockController } from './acta_inicio_mock.controller';
-import { ServiciosMock } from './servicios-mock';
+import { ServiciosMock, SERVICIOS_MOCK } from './servicios-mock';
+
+// URL de ejemplo para los servicios simulados, así la prueba no depende del .env
+SERVICIOS_MOCK.forEach(
+  (servicio) => (process.env[servicio] ??= `http://${servicio.toLowerCase()}/`),
+);
 
 // Módulo y endpoints del modo simulado (ACTA_INICIO_MOCK=true)
 describe('ActaInicioMockModule', () => {

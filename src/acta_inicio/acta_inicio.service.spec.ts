@@ -7,7 +7,12 @@ import { ServiciosMock, SERVICIOS_MOCK } from './mock/servicios-mock';
 import { ESCENARIOS_MOCK } from './mock/datos-mock';
 import { PLANTILLAS_ACTA } from './mock/plantillas-mock';
 
-// Las consultas a los servicios externos (URL del .env) se responden con los
+// URL de ejemplo para los servicios simulados, así la prueba no depende del .env
+SERVICIOS_MOCK.forEach(
+  (servicio) => (process.env[servicio] ??= `http://${servicio.toLowerCase()}/`),
+);
+
+// Las consultas a los servicios externos (URL de ejemplo de arriba) se responden con los
 // escenarios simulados de mock/datos-mock.ts (contratos 9001, 9002, 9003 y 9005)
 
 const esPdf = (base64: string) =>

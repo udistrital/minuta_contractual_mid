@@ -2,13 +2,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import request from 'supertest';
+import axios from 'axios';
 import { ActaInicioModule } from './../src/acta_inicio/acta_inicio.module';
 import { ActaInicioMockModule } from './../src/acta_inicio/mock/acta_inicio_mock.module';
 import { ESCENARIOS_MOCK } from './../src/acta_inicio/mock/datos-mock';
+import {
+  SERVICIOS_MOCK,
+  ServiciosMock,
+} from './../src/acta_inicio/mock/servicios-mock';
+
+// URL de ejemplo para los servicios simulados, así la prueba no depende del .env
+SERVICIOS_MOCK.forEach(
+  (servicio) => (process.env[servicio] ??= `http://${servicio.toLowerCase()}/`),
+);
 
 // Flujo del acta de inicio por HTTP con los servicios simulados
 describe('Acta de inicio con datos simulados (e2e)', () => {
   let app: INestApplication;
+  const adaptadorOriginal = axios.defaults.adapter;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,10 +33,17 @@ describe('Acta de inicio con datos simulados (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
+    // Sin conexión real: el PDF siempre sale del simulador
+    axios.defaults.adapter = moduleFixture
+      .get(ServiciosMock)
+      .crearAdaptador(() =>
+        Promise.reject(new Error('sin conexión en pruebas')),
+      );
   });
 
   afterAll(async () => {
     await app.close();
+    axios.defaults.adapter = adaptadorOriginal;
   });
 
   it.each([9001, 9002, 9003, 9005])(
