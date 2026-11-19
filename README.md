@@ -24,6 +24,28 @@ PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
 Nota: Las URLs de los servicios deben terminar en `/`.
+Nota: `GESTION_CONTRACTUAL_CRUD` incluye el prefijo de versión del CRUD, por ejemplo `https://<host>/gestion_contractual_crud/v1/`; las rutas del código no lo repiten.
+
+### Minuta
+
+Genera la minuta del contrato en PDF (base64) con la plantilla de su unidad ejecutora y tipo de contrato.
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/minutas/contratos/:id` | Minuta del contrato general `id`. |
+
+La respuesta tiene el sobre `{ "Success", "Status", "Message", "Data" }` y el código HTTP es igual a `Status`. `Data` solo viene con el PDF:
+
+| HTTP y Status | Success | Cuándo | Data |
+| --- | --- | --- | --- |
+| `200` | `true` | Minuta generada. Si el contrato aún no tiene número, se muestra `XXXXXXX`. | PDF en base64 |
+| `400` | `false` | El id no es un entero positivo. | — |
+| `404` | `false` | El contrato no existe o no hay plantilla configurada para su unidad ejecutora y tipo de contrato. | — |
+| `422` | `false` | Falta un dato obligatorio: contratista, ordenador, vigencia o cláusulas. `Message`: `Faltan datos: <lista>`. | — |
+| `502` | `false` | Un servicio no respondió o respondió con error. `Message`: `Servicio no disponible: <servicio>`; en el renderizador indica el paso (1: HTML, 2: PDF). | — |
+| `500` | `false` | Error inesperado. | — |
+
+Servicios que consume: `GESTION_CONTRACTUAL_MID` (contrato con `?ids=true`), `GESTION_CONTRACTUAL_CRUD` (`ordenadores/` y `especificaciones-tecnicas/`), `PARAMETROS_CRUD` (año de la vigencia), `PROVEEDORES_MID` (contratista y representante), `ORDENADORES_SUPERVISORES_CONTRATACION_MID` (ordenador), `CLAUSULAS_PARAGRAFOS_CRUD` (cláusulas del contrato) y `PLANTILLAS_MID` (renderizado a HTML y luego a PDF).
 
 ### Acta de aprobación de póliza
 
@@ -34,7 +56,9 @@ Genera el acta de aprobación de póliza en PDF (base64) a partir de la plantill
 | GET | `/acta-poliza/contratos/:id` | Acta con la póliza y los amparos ya registrados para el contrato. |
 | POST | `/acta-poliza/contratos/:id/borrador` | Borrador con los amparos tal como están en pantalla (aún sin registrar). Body: `{ "amparos": [{ "id", "valor", "fecha_inicio", "fecha_fin" }] }`. |
 
-Respuestas: `200` PDF generado, `400` póliza inconsistente (sin número, aseguradora, vigencia, expedición, amparos, o con vigencias inválidas), `404` contrato, póliza, contratista o plantilla no encontrados, `502` un servicio del que depende no respondió.
+Respuestas (en `Status`): `200` PDF generado, `400` póliza inconsistente (sin número, aseguradora, vigencia, expedición, amparos, o con vigencias inválidas), `404` contrato, póliza, contratista o plantilla no encontrados, `502` un servicio del que depende no respondió.
+
+**Diferencia conocida con la minuta:** el acta conserva su respuesta actual. El código HTTP no cambia con el resultado (el GET responde `200` y el POST del borrador `201`, el valor por defecto de NestJS) y el resultado va solo en `Status`, porque su consumidor en el MF revisa `Success` y se rompería con un 4xx. La minuta, en cambio, responde con el código HTTP igual a `Status`.
 
 Servicios que consume: `GESTION_CONTRACTUAL_CRUD` (contrato y contratista), `GESTION_CONTRACTUAL_MID` (póliza y amparos), `PROVEEDORES_MID` (datos del contratista), `PARAMETROS_CRUD` (unidad del plazo de ejecución) y `PLANTILLAS_MID` (renderizado de la plantilla a HTML y luego a PDF).
 
@@ -60,7 +84,7 @@ Nota: Para otras plataformas de PNPM consultar la [documentación oficial](https
 
 ### Swagger
 ```shell
-http://localhost:3000/swagger
+http://localhost:8080/swagger
 ```
 
 ### Ejecución Dockerfile

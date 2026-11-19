@@ -24,12 +24,25 @@ describe('MinutaController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('responde la minuta que genera el servicio', async () => {
-    const respuesta: any = { Success: true, Data: 'pdf-base64' };
-    jest.spyOn(service, 'obtenerMinuta').mockResolvedValue(respuesta);
-    expect(await controller.obtenerMinuta(1)).toBe(respuesta);
-    expect(service.obtenerMinuta).toHaveBeenCalledWith(1);
-  });
+  it.each([
+    [200, { Success: true, Status: 200, Message: 'ok', Data: 'UERG' }],
+    [400, { Success: false, Status: 400, Message: 'id inválido' }],
+    [404, { Success: false, Status: 404, Message: 'Plantilla no encontrada' }],
+    [422, { Success: false, Status: 422, Message: 'Faltan datos: ordenador' }],
+    [502, { Success: false, Status: 502, Message: 'Servicio no disponible' }],
+    [500, { Success: false, Status: 500, Message: 'Error al generar' }],
+  ])(
+    'responde HTTP %i, igual al Status, con el mismo cuerpo del servicio',
+    async (codigo, respuesta) => {
+      jest.spyOn(service, 'obtenerMinuta').mockResolvedValue(respuesta);
+      const res = { status: jest.fn() } as any;
+
+      await expect(controller.obtenerMinuta('7', res)).resolves.toBe(respuesta);
+      expect(service.obtenerMinuta).toHaveBeenCalledWith('7');
+      expect(res.status).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(codigo);
+    },
+  );
 
   it('las clases de DTO y entidad de la minuta se pueden instanciar', () => {
     expect(new CreateMinutaDto()).toBeInstanceOf(CreateMinutaDto);

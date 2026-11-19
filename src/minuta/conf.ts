@@ -30,3 +30,10 @@ export const plantillas: any = {
     [environment.TIPOS_DE_CONTRATO.PRESTACION_DE_SERVICIOS_PROFESIONALES]: '',
   },
 };
+
+// Recursos del CRUD de gestión contractual. El prefijo v1/ va en la variable
+// GESTION_CONTRACTUAL_CRUD, que termina en "/".
+export const RECURSOS_CRUD = {
+  ordenador: 'ordenadores',
+  especificacionTecnica: 'especificaciones-tecnicas',
+} as const;
