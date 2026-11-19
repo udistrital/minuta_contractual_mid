@@ -15,4 +15,25 @@ export const environment = {
     PRESTACION_DE_SERVICIOS: 6545,
     PRESTACION_DE_SERVICIOS_PROFESIONALES: 6546,
   },
+  // Estados generales del contrato (Parámetros CRUD, tipo 137)
+  ESTADOS_GENERALES: {
+    SUSCRITO: 6774,
+    LEGALIZADO: 6776,
+    EN_EJECUCION: 6777,
+  },
+  // Roles que pueden generar el acta de inicio
+  ROLES_ACTA_INICIO: [
+    'ABOGADO_CONTRATACION_RECTOR',
+    'ABOGADO_CONTRATACION_IDEXUD',
+    'CONTRATISTA',
+  ],
+  // Tipos de documento en Parámetros CRUD
+  TIPO_DOCUMENTO_ID_PARAMETROS: {
+    MINUTA: 6805,
+  },
+  // Tipos de documento en el Gestor Documental (Nuxeo)
+  TIPO_DOCUMENTO_ID_GESTOR_DOCUMENTAL: {
+    ACTAS_DE_INICIO: 175,
+  },
+  CIUDAD_SUSCRIPCION: 'Bogotá D.C.',
 };
