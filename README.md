@@ -19,6 +19,7 @@ PLANTILLAS_MID
 PARAMETROS_CRUD
 PROVEEDORES_MID
 ORDENADORES_SUPERVISORES_CONTRATACION_MID
+ACTA_INICIO_MOCK: [true para probar el acta de inicio con datos simulados]
 PORT: [Puerto de ejecución API]
 ```
 Nota: En caso de no asignar el puerto en las variables de entorno, se asignará el puerto por defecto.
@@ -102,6 +103,12 @@ Pruebas unitarias
 ```shell
 # Test
 pnpm test
+
+# Test
+pnpm test:e2e
+
+# Cobertura de pruebas
+pnpm test:cov
 
 # Se ejecutará jest, validando los casos de prueba en los archivos .spec.ts
 

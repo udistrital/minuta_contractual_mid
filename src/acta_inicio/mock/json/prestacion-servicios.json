@@ -1,0 +1,30 @@
+{
+  "plantilla_id": "67930c2a206ae652dbeb3d0b",
+  "data": {
+    "numero_contrato": "CPS-0145-2026",
+    "objeto_contrato": "Prestar servicios profesionales para el desarrollo, mantenimiento y soporte de los sistemas de información de gestión contractual de la Universidad.",
+    "valor_contrato": "$ 54.600.000",
+    "plazo_contrato": "7 meses",
+    "fecha_inicio": "2026-02-02",
+    "fecha_terminacion": "2026-09-02",
+    "numero_poliza": "SEG-12-44-101234",
+    "fecha_expedicion_poliza": "2026-01-26",
+    "fecha_aprobacion_poliza": "2026-01-29",
+    "certificado_disponibilidad": "1287",
+    "valor_disponibilidad": "$ 54.600.000",
+    "nombre_contratista": "Laura Marcela Rincón Vargas",
+    "cedula_contratista": "1.032.456.789",
+    "ciudad_expedicion_contratista": "Bogotá D.C.",
+    "nombre_supervisor": "Carlos Andrés Mejía Torres",
+    "cedula_supervisor": "79.845.123",
+    "ciudad_expedicion_supervisor": "Bogotá D.C.",
+    "ciudad": "Bogotá D.C.",
+    "dia": "dos",
+    "dia_numero": "2",
+    "mes": "febrero",
+    "year": "2026",
+    "dia_inicio": "2",
+    "mes_inicio": "febrero",
+    "year_inicio": "2026"
+  }
+}
