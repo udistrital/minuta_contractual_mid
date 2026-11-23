@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
 import axios from 'axios';
 import { RespuestaMinutaDto } from './dto/respuesta-minuta.dto';
 import { ServicioNoDisponibleError } from './servicio-no-disponible.error';
+import { numeroALetras } from './numero-a-letras';
+import { formatearValorPesos } from './formatos';
 
 // Marcador de los datos que todavía no existen (por ejemplo, el número de
 // contrato antes de quedar suscrito).
@@ -142,12 +144,16 @@ export class MinutaService {
         clausulas,
         especificaciones,
         contratista,
+        unidadPlazo,
+        disponibilidades,
       ] = await Promise.all([
         this.obtenerVigencia(contratoMid.vigencia_id),
         this.obtenerOrdenadorArgoId(id),
         this.obtenerPlantillaClausulas(id),
         this.obtenerEspecificaciones(contratoMid),
         this.obtenerContratista(contratoMid.proveedor_numero_documento),
+        this.obtenerUnidadPlazo(contratoMid.unidad_ejecucion_id),
+        this.obtenerDisponibilidades(id),
       ]);
       const ordenador = await this.obtenerOrdenador(ordenadorArgoId);
 
@@ -173,6 +179,8 @@ export class MinutaService {
         especificaciones,
         amparos,
         clausulas,
+        unidadPlazo,
+        disponibilidades,
       });
 
       const html = await this.renderizarHTML(plantilla_id, datosIniciales);
@@ -237,6 +245,7 @@ export class MinutaService {
       fecha_suscripcion_estudios:
         fecha_suscripcion_estudios || MARCADOR_FALTANTE,
       perfil_profesional: this.esPerfilProfesional(perfil_contratista),
+      ...this.obtenerCamposClausulas(data),
     };
 
     if (representante) {
@@ -257,6 +266,60 @@ export class MinutaService {
     }
 
     return datos;
+  }
+
+  // Campos que usan las cláusulas guardadas ({{objeto}}, {{valorPesos}}...).
+  // Se resuelven en la segunda pasada del renderizado con los datos actuales
+  // del contrato; la cláusula guardada conserva sus marcadores. Si un dato no
+  // está registrado, el campo va vacío (no son obligatorios).
+  private obtenerCamposClausulas(data: any) {
+    const { objeto, actividades, plazo_ejecucion, valor_pesos } =
+      data.contratoMid || {};
+    const tieneValor =
+      valor_pesos !== null &&
+      valor_pesos !== undefined &&
+      valor_pesos !== '' &&
+      Number.isFinite(Number(valor_pesos));
+    const cdps = this.formatearDisponibilidades(data.disponibilidades);
+    return {
+      objeto: objeto || '',
+      actividades: actividades || '',
+      plazo_ejecucion: this.formatearPlazo(plazo_ejecucion, data.unidadPlazo),
+      valorPesos: tieneValor ? formatearValorPesos(valor_pesos) : '',
+      valorTexto: tieneValor
+        ? numeroALetras(Number(valor_pesos)).toUpperCase()
+        : '',
+      numero_cdp_id: cdps.map((cdp) => cdp.numero_cdp_id).join(', '),
+      vigencia_cdp: [...new Set(cdps.map((cdp) => cdp.vigencia_cdp))]
+        .filter((vigencia) => vigencia !== '')
+        .join(', '),
+      cdps,
+    };
+  }
+
+  // Plazo con su unidad, por ejemplo "6 MESES"; vacío si no hay plazo
+  private formatearPlazo(plazo: unknown, unidad: string | null): string {
+    if (plazo === null || plazo === undefined || plazo === '') return '';
+    return `${plazo} ${unidad || ''}`.trim();
+  }
+
+  // CDP del contrato en el orden del CRUD: número y vigencia como texto
+  private formatearDisponibilidades(
+    disponibilidades: any,
+  ): { numero_cdp_id: string; vigencia_cdp: string }[] {
+    if (!Array.isArray(disponibilidades)) return [];
+    return disponibilidades
+      .filter(
+        (cdp) =>
+          cdp?.numero_cdp_id !== null && cdp?.numero_cdp_id !== undefined,
+      )
+      .map((cdp) => ({
+        numero_cdp_id: String(cdp.numero_cdp_id),
+        vigencia_cdp:
+          cdp.vigencia_cdp_id === null || cdp.vigencia_cdp_id === undefined
+            ? ''
+            : String(cdp.vigencia_cdp_id),
+      }));
   }
 
   // Plantilla por unidad ejecutora y tipo de contrato
@@ -348,6 +411,23 @@ export class MinutaService {
     const url = `${this.configService.get<string>('PARAMETROS_CRUD')}parametro/${vigenciaId}`;
     const data = await this.fetchData(url, SERVICIOS_MINUTA.parametros);
     return data?.Nombre ?? null;
+  }
+
+  // Nombre de la unidad del plazo de ejecución (parámetro: DIAS, MESES...)
+  private async obtenerUnidadPlazo(
+    unidadEjecucionId: number,
+  ): Promise<string | null> {
+    if (!unidadEjecucionId) return null;
+    const url = `${this.configService.get<string>('PARAMETROS_CRUD')}parametro/${unidadEjecucionId}`;
+    const data = await this.fetchData(url, SERVICIOS_MINUTA.parametros);
+    return data?.Nombre || null;
+  }
+
+  // CDP activos del contrato, en el orden en que los devuelve el CRUD
+  private async obtenerDisponibilidades(idContrato: number) {
+    const query = `query=contrato_general_id.id:${idContrato},activo:true&limit=0`;
+    const url = `${this.configService.get<string>('GESTION_CONTRACTUAL_CRUD')}${RECURSOS_CRUD.disponibilidadPresupuestal}/?${query}`;
+    return this.fetchData(url, SERVICIOS_MINUTA.crud);
   }
 
   // Información del contratista (Persona natural) o contratista y representante (Persona juridica)

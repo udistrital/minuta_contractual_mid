@@ -25,6 +25,8 @@ const URL = {
     `http://crud/v1/ordenadores/?query=contrato_general_id.id:${id},activo:true&sortby=fecha_creacion,id&order=desc&limit=1`,
   especificaciones: (id: number) =>
     `http://crud/v1/especificaciones-tecnicas/?query=contrato_general_id.id:${id},activo:true&limit=0`,
+  disponibilidades: (id: number) =>
+    `http://crud/v1/disponibilidades-presupuestales/?query=contrato_general_id.id:${id},activo:true&limit=0`,
   vigencia: (id: number) => `http://parametros/v1/parametro/${id}`,
   contratista: (doc: string) => `http://proveedores/contratistas?id=${doc}`,
   ordenadorArgo: (id: number) => `http://ordenadores/v1/ordenadores/${id}`,
@@ -122,6 +124,7 @@ describe('MinutaService con el CRUD de gestión contractual', () => {
       ok([{ nombre: `Cláusula del contrato ${contrato.id}`, paragrafos: [] }]),
     [URL.contratista(contrato.proveedor_numero_documento)]: () => ok(proveedor),
     [URL.ordenadorArgo(55)]: () => ok(ordenadorArgo),
+    [URL.disponibilidades(contrato.id)]: () => ok([]),
   });
 
   const responder =
