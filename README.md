@@ -45,7 +45,26 @@ La respuesta tiene el sobre `{ "Success", "Status", "Message", "Data" }` y el c�
 | `502` | `false` | Un servicio no respondió o respondió con error. `Message`: `Servicio no disponible: <servicio>`; en el renderizador indica el paso (1: HTML, 2: PDF). | — |
 | `500` | `false` | Error inesperado. | — |
 
-Servicios que consume: `GESTION_CONTRACTUAL_MID` (contrato con `?ids=true`), `GESTION_CONTRACTUAL_CRUD` (`ordenadores/` y `especificaciones-tecnicas/`), `PARAMETROS_CRUD` (año de la vigencia), `PROVEEDORES_MID` (contratista y representante), `ORDENADORES_SUPERVISORES_CONTRATACION_MID` (ordenador), `CLAUSULAS_PARAGRAFOS_CRUD` (cláusulas del contrato) y `PLANTILLAS_MID` (renderizado a HTML y luego a PDF).
+Servicios que consume: `GESTION_CONTRACTUAL_MID` (contrato con `?ids=true`), `GESTION_CONTRACTUAL_CRUD` (`ordenadores/`, `especificaciones-tecnicas/` y `disponibilidades-presupuestales/`), `PARAMETROS_CRUD` (año de la vigencia y unidad del plazo), `PROVEEDORES_MID` (contratista y representante), `ORDENADORES_SUPERVISORES_CONTRATACION_MID` (ordenador), `CLAUSULAS_PARAGRAFOS_CRUD` (cláusulas del contrato) y `PLANTILLAS_MID` (renderizado a HTML y luego a PDF).
+
+#### Campos de las cláusulas
+
+Las cláusulas guardadas conservan sus marcadores (`{{objeto}}`, `{{valorPesos}}`…), que se resuelven en la segunda pasada del renderizado con los datos del contrato al generar la minuta. La cláusula guardada no se reescribe.
+
+| Variable | Origen | Ejemplo |
+| --- | --- | --- |
+| `objeto` | `objeto` del contrato | `Compra de equipos` |
+| `actividades` | `actividades` del contrato | `Entrega e instalación` |
+| `plazo_ejecucion` | `plazo_ejecucion` del contrato y el nombre de su unidad (`unidad_ejecucion_id` en `PARAMETROS_CRUD`) | `6 MESES` |
+| `valorPesos` | `valor_pesos` con formato colombiano, sin símbolo; con centavos solo si los hay | `1.500.000` / `1.500.000,50` |
+| `valorTexto` | `valor_pesos` en letras, en mayúsculas y sin centavos (igual que el paso de cláusulas del MF) | `UN MILLÓN QUINIENTOS MIL PESOS M/CTE` |
+| `numero_cdp_id` | Números de los CDP activos del contrato, unidos con `, ` en el orden del CRUD | `321, 654` |
+| `vigencia_cdp` | Vigencias de esos CDP, sin repetir, unidas con `, ` | `2026, 2025` |
+| `cdps` | Lista `[{ numero_cdp_id, vigencia_cdp }]`, para recorrerla en una plantilla | — |
+
+Estos campos **no son obligatorios**: si el contrato no tiene el dato, la variable va vacía y la minuta se genera. Si el CRUD o `PARAMETROS_CRUD` fallan al consultarlos, se responde `502`, como con los demás servicios. El rubro del CDP (`rubro_cdp`) no se envía: no está en el CRUD y depende de `presupuesto_contractual_mid`.
+
+`fecha_suscripcion_estudios` se envía en español (`3 de noviembre de 2026`), tomada del texto de la fecha y sin conversión de zona horaria.
 
 ### Acta de aprobación de póliza
 
