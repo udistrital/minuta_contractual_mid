@@ -6,7 +6,7 @@ import axios from 'axios';
 import { RespuestaMinutaDto } from './dto/respuesta-minuta.dto';
 import { ServicioNoDisponibleError } from './servicio-no-disponible.error';
 import { numeroALetras } from './numero-a-letras';
-import { formatearValorPesos } from './formatos';
+import { formatearFechaEnEspanol, formatearValorPesos } from './formatos';
 
 // Marcador de los datos que todavía no existen (por ejemplo, el número de
 // contrato antes de quedar suscrito).
@@ -242,8 +242,9 @@ export class MinutaService {
       contratista_lugar_exp: ciudad_expedicion_documento || MARCADOR_FALTANTE,
       justificacion: justificacion || MARCADOR_FALTANTE,
       modalidad_seleccion_tipo: modalidad_seleccion || MARCADOR_FALTANTE,
-      fecha_suscripcion_estudios:
-        fecha_suscripcion_estudios || MARCADOR_FALTANTE,
+      fecha_suscripcion_estudios: fecha_suscripcion_estudios
+        ? formatearFechaEnEspanol(fecha_suscripcion_estudios)
+        : MARCADOR_FALTANTE,
       perfil_profesional: this.esPerfilProfesional(perfil_contratista),
       ...this.obtenerCamposClausulas(data),
     };
