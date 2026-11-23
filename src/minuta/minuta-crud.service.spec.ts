@@ -28,6 +28,7 @@ const URL = {
   disponibilidades: (id: number) =>
     `http://crud/v1/disponibilidades-presupuestales/?query=contrato_general_id.id:${id},activo:true&limit=0`,
   vigencia: (id: number) => `http://parametros/v1/parametro/${id}`,
+  unidadPlazo: (id: number) => `http://parametros/v1/parametro/${id}`,
   contratista: (doc: string) => `http://proveedores/contratistas?id=${doc}`,
   ordenadorArgo: (id: number) => `http://ordenadores/v1/ordenadores/${id}`,
   clausulas: (id: number) => `http://clausulas/v1/contratos/${id}`,
@@ -530,6 +531,199 @@ describe('MinutaService con el CRUD de gestión contractual', () => {
         'Servicio no disponible: plantillas_mid (paso 2: PDF)',
       );
       expect(r).not.toHaveProperty('Data');
+    });
+  });
+
+  describe('campos de las cláusulas y fecha de los estudios', () => {
+    // Contrato con los datos que usan las cláusulas guardadas (ficticios)
+    const conCampos = () => ({
+      ...contratoServicios(),
+      objeto: 'Objeto ficticio del contrato',
+      actividades: 'Actividad uno. Actividad dos.',
+      plazo_ejecucion: 6,
+      unidad_ejecucion_id: 9100,
+      valor_pesos: 25300450,
+    });
+
+    const usarContrato = (contrato: any, cdps: any[] | (() => any)) => {
+      rutasGet = {
+        ...rutasContrato(contrato, proveedorNatural),
+        [URL.unidadPlazo(9100)]: () => ok({ Id: 9100, Nombre: 'MESES' }),
+        [URL.disponibilidades(contrato.id)]:
+          typeof cdps === 'function' ? cdps : () => ok(cdps),
+      };
+    };
+
+    it('envía objeto, actividades, plazo con su unidad, valor, valor en letras y el CDP', async () => {
+      usarContrato(conCampos(), [
+        { id: 1, numero_cdp_id: 345, vigencia_cdp_id: 2026, activo: true },
+      ]);
+
+      const r = await service.obtenerMinuta(1);
+
+      expect(r.Status).toBe(200);
+      expect(datosRenderizados()).toEqual(
+        expect.objectContaining({
+          objeto: 'Objeto ficticio del contrato',
+          actividades: 'Actividad uno. Actividad dos.',
+          plazo_ejecucion: '6 MESES',
+          valorPesos: '25.300.450',
+          valorTexto:
+            'VEINTICINCO MILLONES TRESCIENTOS MIL CUATROCIENTOS CINCUENTA PESOS M/CTE',
+          numero_cdp_id: '345',
+          vigencia_cdp: '2026',
+          cdps: [{ numero_cdp_id: '345', vigencia_cdp: '2026' }],
+        }),
+      );
+      const urls = get.mock.calls.map(([url]) => url);
+      expect(urls).toEqual(
+        expect.arrayContaining([
+          URL.unidadPlazo(9100),
+          URL.disponibilidades(1),
+        ]),
+      );
+    });
+
+    it('varios CDP: números unidos con coma en el orden del CRUD y vigencias sin repetir', async () => {
+      usarContrato(conCampos(), [
+        { numero_cdp_id: 900, vigencia_cdp_id: 2026 },
+        { numero_cdp_id: 15, vigencia_cdp_id: 2025 },
+        { numero_cdp_id: 77, vigencia_cdp_id: 2026 },
+        { numero_cdp_id: null, vigencia_cdp_id: 2024 },
+      ]);
+
+      await service.obtenerMinuta(1);
+
+      const datos = datosRenderizados();
+      expect(datos.numero_cdp_id).toBe('900, 15, 77');
+      expect(datos.vigencia_cdp).toBe('2026, 2025');
+      expect(datos.cdps).toEqual([
+        { numero_cdp_id: '900', vigencia_cdp: '2026' },
+        { numero_cdp_id: '15', vigencia_cdp: '2025' },
+        { numero_cdp_id: '77', vigencia_cdp: '2026' },
+      ]);
+    });
+
+    it('el valor con centavos sale con dos decimales y en letras solo la parte entera', async () => {
+      usarContrato({ ...conCampos(), valor_pesos: 1500000.5 }, []);
+
+      await service.obtenerMinuta(1);
+
+      expect(datosRenderizados()).toEqual(
+        expect.objectContaining({
+          valorPesos: '1.500.000,50',
+          valorTexto: 'UN MILLÓN QUINIENTOS MIL PESOS M/CTE',
+        }),
+      );
+    });
+
+    it('valor cero: "0" y "CERO PESOS M/CTE", como en el MF', async () => {
+      usarContrato({ ...conCampos(), valor_pesos: 0 }, []);
+
+      await service.obtenerMinuta(1);
+
+      expect(datosRenderizados()).toEqual(
+        expect.objectContaining({
+          valorPesos: '0',
+          valorTexto: 'CERO PESOS M/CTE',
+        }),
+      );
+    });
+
+    it('sin datos registrados los campos van vacíos y la minuta se genera (no son obligatorios)', async () => {
+      usarContrato(contratoServicios(), []);
+
+      const r = await service.obtenerMinuta(1);
+
+      expect(r.Status).toBe(200);
+      expect(datosRenderizados()).toEqual(
+        expect.objectContaining({
+          objeto: '',
+          actividades: '',
+          plazo_ejecucion: '',
+          valorPesos: '',
+          valorTexto: '',
+          numero_cdp_id: '',
+          vigencia_cdp: '',
+          cdps: [],
+        }),
+      );
+      // Sin unidad del plazo no se consulta Parámetros para ella
+      expect(get.mock.calls.map(([url]) => url)).not.toContain(
+        URL.unidadPlazo(9100),
+      );
+      expect(CAMPOS_OBLIGATORIOS_MINUTA).not.toEqual(
+        expect.arrayContaining(['objeto']),
+      );
+    });
+
+    it('plazo sin unidad registrada: solo el número', async () => {
+      usarContrato({ ...conCampos(), unidad_ejecucion_id: null }, []);
+
+      await service.obtenerMinuta(1);
+
+      expect(datosRenderizados().plazo_ejecucion).toBe('6');
+    });
+
+    it('sin CDP en el CRUD (404) los campos del CDP van vacíos', async () => {
+      usarContrato(conCampos(), () => {
+        throw noEncontrado();
+      });
+
+      const r = await service.obtenerMinuta(1);
+
+      expect(r.Status).toBe(200);
+      expect(datosRenderizados().numero_cdp_id).toBe('');
+      expect(datosRenderizados().cdps).toEqual([]);
+    });
+
+    it('502 si el CRUD falla al consultar los CDP', async () => {
+      usarContrato(conCampos(), () => {
+        throw caido();
+      });
+
+      const r = await service.obtenerMinuta(1);
+
+      expect(r).toEqual({
+        Success: false,
+        Status: 502,
+        Message: 'Servicio no disponible: gestion_contractual_crud',
+      });
+      expect(post).not.toHaveBeenCalled();
+    });
+
+    it('502 si Parámetros falla al consultar la unidad del plazo', async () => {
+      usarContrato(conCampos(), []);
+      rutasGet[URL.unidadPlazo(9100)] = () => {
+        throw error500();
+      };
+
+      const r = await service.obtenerMinuta(1);
+
+      expect(r.Status).toBe(502);
+      expect(r.Message).toBe('Servicio no disponible: parametros_crud');
+      expect(post).not.toHaveBeenCalled();
+    });
+
+    it('fecha de los estudios en español, sin desfase de zona horaria', async () => {
+      await service.obtenerMinuta(1);
+
+      expect(datosRenderizados().fecha_suscripcion_estudios).toBe(
+        '2 de noviembre de 2026',
+      );
+    });
+
+    it('sin fecha de los estudios sigue el marcador', async () => {
+      rutasGet = rutasContrato(
+        { ...contratoServicios(), fecha_suscripcion_estudios: null },
+        proveedorNatural,
+      );
+
+      await service.obtenerMinuta(1);
+
+      expect(datosRenderizados().fecha_suscripcion_estudios).toBe(
+        MARCADOR_FALTANTE,
+      );
     });
   });
 });
