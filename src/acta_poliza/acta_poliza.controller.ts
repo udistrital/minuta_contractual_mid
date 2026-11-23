@@ -1,5 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
+import { CONTRATO_ID_MAXIMO, ContratoIdPipe } from '../utils/contrato-id.pipe';
 import { ActaPolizaService, FilaAmparoBorrador } from './acta_poliza.service';
 
 @Controller('acta-poliza')
@@ -31,16 +38,22 @@ export class ActaPolizaController {
     return await this.actaPolizaService.obtenerActaPoliza(id);
   }
 
-  @Post('contratos/:id/borrador')
+  @Post('contratos/borrador')
   @ApiOperation({
     summary:
       'Borrador del acta de aprobación de póliza en PDF (base64), con amparos aún sin registrar',
   })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
-    description: 'Id del contrato general',
+  @ApiQuery({
+    name: 'contrato-id',
     required: true,
+    description: 'Id del contrato general',
+    schema: {
+      type: 'integer',
+      format: 'int32',
+      minimum: 1,
+      maximum: CONTRATO_ID_MAXIMO,
+      example: 9001,
+    },
   })
   @ApiBody({
     schema: {
@@ -56,19 +69,20 @@ export class ActaPolizaController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Borrador generado correctamente' })
-  @ApiResponse({ status: 400, description: 'Póliza inconsistente' })
-  @ApiResponse({ status: 404, description: 'Recurso no encontrado' })
+  // HTTP 201 en todos los resultados de la generación; el resultado va en Status
+  // (README). Solo contrato-id inválido responde con HTTP 400.
   @ApiResponse({
-    status: 502,
-    description: 'Servicio dependiente no disponible',
+    status: 201,
+    description:
+      'Solicitud procesada; Status 200 borrador generado, 400 póliza inconsistente, 404 recurso no encontrado, 502 servicio dependiente no disponible',
   })
+  @ApiResponse({ status: 400, description: 'contrato-id ausente o inválido' })
   async obtenerBorradorActaPoliza(
-    @Param('id') id: number,
+    @Query('contrato-id', ContratoIdPipe) contratoId: number,
     @Body() body: { amparos?: FilaAmparoBorrador[] },
   ) {
     return await this.actaPolizaService.obtenerActaPoliza(
-      id,
+      contratoId,
       Array.isArray(body?.amparos) ? body.amparos : [],
     );
   }
