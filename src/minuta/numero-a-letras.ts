@@ -3,10 +3,13 @@
 // el paso de cláusulas. Solo escribe la parte entera; los centavos no se
 // escriben, igual que en el MF.
 //
-// Única diferencia con el MF: desde mil millones el MF arma el número de
-// millones con las centenas y escribe "undefined millones". Aquí se usan los
-// miles ("mil millones", "dos mil quinientos millones"). Por debajo de mil
-// millones el resultado es el mismo.
+// Diferencias con el MF, solo en casos que el MF escribe mal:
+// - desde mil millones el MF arma el número de millones con las centenas y
+//   escribe "Undefined millones"; aquí se usan los miles ("mil millones",
+//   "dos mil quinientos millones");
+// - entre 0 y 1 (solo centavos) el MF escribe " pesos M/CTE"; aquí, "Cero
+//   pesos M/CTE".
+// En el resto el resultado es el mismo.
 export function numeroALetras(num: number): string {
   if (isNaN(num) || num === null || num === undefined || num <= 0) {
     return 'Cero pesos M/CTE';
@@ -102,6 +105,7 @@ export function numeroALetras(num: number): string {
   };
 
   const entero = Math.floor(Math.abs(num));
+  if (entero === 0) return 'Cero pesos M/CTE';
   const resultado = millones(entero);
   const capitalizado = resultado.charAt(0).toUpperCase() + resultado.slice(1);
   return `${capitalizado} pesos M/CTE`;
