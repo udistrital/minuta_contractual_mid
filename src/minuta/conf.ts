@@ -36,4 +36,5 @@ export const plantillas: any = {
 export const RECURSOS_CRUD = {
   ordenador: 'ordenadores',
   especificacionTecnica: 'especificaciones-tecnicas',
+  disponibilidadPresupuestal: 'disponibilidades-presupuestales',
 } as const;
