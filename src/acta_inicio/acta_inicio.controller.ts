@@ -39,7 +39,7 @@ export class ActaInicioController {
   @Post('contratos/previsualizacion')
   @ApiOperation({ summary: 'Vista previa del acta de inicio en PDF (base64)' })
   @ApiQuery({
-    name: 'contrato-id',
+    name: 'contrato_id',
     required: true,
     description: 'Id del contrato general',
     schema: {
@@ -54,9 +54,9 @@ export class ActaInicioController {
     status: 201,
     description: 'Solicitud procesada correctamente',
   })
-  @ApiResponse({ status: 400, description: 'contrato-id ausente o inválido' })
+  @ApiResponse({ status: 400, description: 'contrato_id ausente o inválido' })
   async previsualizar(
-    @Query('contrato-id', ContratoIdPipe) contratoId: number,
+    @Query('contrato_id', ContratoIdPipe) contratoId: number,
     @Body() datos: DatosActaInicioDto,
   ) {
     return await this.actaInicioService.obtenerMinuta(contratoId, datos);
