@@ -137,7 +137,7 @@ paths:
     post:
       operationId: ActaInicioController_previsualizar
       parameters:
-        - name: contrato-id
+        - name: contrato_id
           required: true
           in: query
           description: Id del contrato general
@@ -157,7 +157,7 @@ paths:
         '201':
           description: Solicitud procesada correctamente
         '400':
-          description: contrato-id ausente o inválido
+          description: contrato_id ausente o inválido
       summary: Vista previa del acta de inicio en PDF (base64)
       tags: *ref_0
   /acta-inicio/{id}:
@@ -203,7 +203,7 @@ paths:
     post:
       operationId: ActaPolizaController_obtenerBorradorActaPoliza
       parameters:
-        - name: contrato-id
+        - name: contrato_id
           required: true
           in: query
           description: Id del contrato general
@@ -231,7 +231,7 @@ paths:
             inconsistente, 404 recurso no encontrado, 502 servicio dependiente
             no disponible
         '400':
-          description: contrato-id ausente o inválido
+          description: contrato_id ausente o inválido
       summary: >-
         Borrador del acta de aprobación de póliza en PDF (base64), con amparos
         aún sin registrar
