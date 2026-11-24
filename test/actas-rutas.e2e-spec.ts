@@ -14,7 +14,7 @@ import {
   ServiciosMock,
 } from './../src/acta_inicio/mock/servicios-mock';
 
-// Rutas del acta de inicio y del acta de póliza con contrato-id en la consulta
+// Rutas del acta de inicio y del acta de póliza con contrato_id en la consulta
 // (udistrital/argo_documentacion#414).
 
 const CONTRATO_ID_INVALIDO = {
@@ -37,7 +37,7 @@ const INVALIDOS = [
   '0',
   '-1',
   '2147483648',
-  '1&contrato-id=2',
+  '1&contrato_id=2',
 ];
 const usuario = { usuario_id: 1, usuario_rol: 'ABOGADO_CONTRATACION_RECTOR' };
 const amparos = [
@@ -49,7 +49,7 @@ const amparos = [
   },
 ];
 
-describe('Rutas de actas con contrato-id (servicios simulados)', () => {
+describe('Rutas de actas con contrato_id (servicios simulados)', () => {
   let app: INestApplication;
   const respuestaPrevia = {
     Success: true,
@@ -97,9 +97,9 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
   afterAll(() => app.close());
 
   describe('POST /acta-inicio/contratos/previsualizacion', () => {
-    it('201: genera la vista previa del contrato de contrato-id', async () => {
+    it('201: genera la vista previa del contrato de contrato_id', async () => {
       const res = await request(app.getHttpServer())
-        .post('/acta-inicio/contratos/previsualizacion?contrato-id=9001')
+        .post('/acta-inicio/contratos/previsualizacion?contrato_id=9001')
         .send({ objeto: 'Objeto de prueba' })
         .expect(201);
 
@@ -112,7 +112,7 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
     // Falla si 'contratos/previsualizacion' se declara después de 'contratos/:id'
     it('no cae en la generación del acta aunque el cuerpo traiga usuario y rol', async () => {
       await request(app.getHttpServer())
-        .post('/acta-inicio/contratos/previsualizacion?contrato-id=1')
+        .post('/acta-inicio/contratos/previsualizacion?contrato_id=1')
         .send(usuario)
         .expect(201);
 
@@ -120,7 +120,7 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
       expect(actaInicio.obtenerMinuta).toHaveBeenCalledWith(1, usuario);
     });
 
-    it('400: sin contrato-id no ejecuta nada, ni la generación', async () => {
+    it('400: sin contrato_id no ejecuta nada, ni la generación', async () => {
       const res = await request(app.getHttpServer())
         .post('/acta-inicio/contratos/previsualizacion')
         .send(usuario)
@@ -130,9 +130,19 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
       servicios().forEach((fn) => expect(fn).not.toHaveBeenCalled());
     });
 
-    it.each(INVALIDOS)('400: contrato-id %p no es válido', async (valor) => {
+    it.each(INVALIDOS)('400: contrato_id %p no es válido', async (valor) => {
       const res = await request(app.getHttpServer())
-        .post(`/acta-inicio/contratos/previsualizacion?contrato-id=${valor}`)
+        .post(`/acta-inicio/contratos/previsualizacion?contrato_id=${valor}`)
+        .send({})
+        .expect(400);
+
+      expect(res.body).toEqual(CONTRATO_ID_INVALIDO);
+      servicios().forEach((fn) => expect(fn).not.toHaveBeenCalled());
+    });
+
+    it('400: el nombre con guion (contrato-id) no se acepta', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/acta-inicio/contratos/previsualizacion?contrato-id=9001')
         .send({})
         .expect(400);
 
@@ -178,7 +188,7 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
   describe('POST /acta-poliza/contratos/borrador', () => {
     it('201: genera el borrador con las filas enviadas', async () => {
       const res = await request(app.getHttpServer())
-        .post('/acta-poliza/contratos/borrador?contrato-id=9001')
+        .post('/acta-poliza/contratos/borrador?contrato_id=9001')
         .send({ amparos })
         .expect(201);
 
@@ -188,14 +198,14 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
 
     it('201: sin amparos en el cuerpo envía una lista vacía, como antes', async () => {
       await request(app.getHttpServer())
-        .post('/acta-poliza/contratos/borrador?contrato-id=9001')
+        .post('/acta-poliza/contratos/borrador?contrato_id=9001')
         .send({})
         .expect(201);
 
       expect(actaPoliza.obtenerActaPoliza).toHaveBeenCalledWith(9001, []);
     });
 
-    it('400: sin contrato-id no ejecuta nada', async () => {
+    it('400: sin contrato_id no ejecuta nada', async () => {
       const res = await request(app.getHttpServer())
         .post('/acta-poliza/contratos/borrador')
         .send({ amparos })
@@ -205,9 +215,19 @@ describe('Rutas de actas con contrato-id (servicios simulados)', () => {
       servicios().forEach((fn) => expect(fn).not.toHaveBeenCalled());
     });
 
-    it.each(INVALIDOS)('400: contrato-id %p no es válido', async (valor) => {
+    it.each(INVALIDOS)('400: contrato_id %p no es válido', async (valor) => {
       const res = await request(app.getHttpServer())
-        .post(`/acta-poliza/contratos/borrador?contrato-id=${valor}`)
+        .post(`/acta-poliza/contratos/borrador?contrato_id=${valor}`)
+        .send({ amparos })
+        .expect(400);
+
+      expect(res.body).toEqual(CONTRATO_ID_INVALIDO);
+      servicios().forEach((fn) => expect(fn).not.toHaveBeenCalled());
+    });
+
+    it('400: el nombre con guion (contrato-id) no se acepta', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/acta-poliza/contratos/borrador?contrato-id=9001')
         .send({ amparos })
         .expect(400);
 
