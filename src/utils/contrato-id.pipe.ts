@@ -4,10 +4,10 @@ import { BadRequestException, HttpStatus, PipeTransform } from '@nestjs/common';
 export const CONTRATO_ID_MAXIMO = 2147483647;
 
 export const MENSAJE_CONTRATO_ID_INVALIDO =
-  "El parámetro de consulta 'contrato-id' es obligatorio y debe ser un entero entre 1 y 2147483647";
+  'El id del contrato es obligatorio y debe ser un entero positivo';
 
 export const MENSAJE_ID_RUTA_INVALIDO =
-  "El parámetro de ruta 'id' debe ser un entero entre 1 y 2147483647";
+  'El id del contrato debe ser un entero positivo';
 
 // Valida el id de un contrato general: entero en base 10, sin signo, espacios,
 // decimales ni notación científica o hexadecimal. Por defecto lee el parámetro

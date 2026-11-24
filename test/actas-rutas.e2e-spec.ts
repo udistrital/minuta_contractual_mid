@@ -20,13 +20,12 @@ import {
 const CONTRATO_ID_INVALIDO = {
   Success: false,
   Status: 400,
-  Message:
-    "El parámetro de consulta 'contrato-id' es obligatorio y debe ser un entero entre 1 y 2147483647",
+  Message: 'El id del contrato es obligatorio y debe ser un entero positivo',
 };
 const ID_RUTA_INVALIDO = {
   Success: false,
   Status: 400,
-  Message: "El parámetro de ruta 'id' debe ser un entero entre 1 y 2147483647",
+  Message: 'El id del contrato debe ser un entero positivo',
 };
 const INVALIDOS = [
   '',
