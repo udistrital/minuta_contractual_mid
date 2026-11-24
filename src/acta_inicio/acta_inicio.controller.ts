@@ -1,5 +1,10 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  CONTRATO_ID_MAXIMO,
+  ContratoIdPipe,
+  MENSAJE_ID_RUTA_INVALIDO,
+} from '../utils/contrato-id.pipe';
 import { ActaInicioService } from './acta_inicio.service';
 import {
   DatosActaInicioDto,
@@ -28,22 +33,33 @@ export class ActaInicioController {
     return await this.actaInicioService.obtenerPrecarga(id);
   }
 
-  @Post('contratos/:id/previsualizacion')
+  // Debe declararse antes de POST contratos/:id: Express resuelve las rutas en
+  // orden de registro y 'previsualizacion' caería en la generación del acta.
+  // Lo cubre test/actas-rutas.e2e-spec.ts.
+  @Post('contratos/previsualizacion')
   @ApiOperation({ summary: 'Vista previa del acta de inicio en PDF (base64)' })
-  @ApiParam({
-    name: 'id',
-    type: 'number',
+  @ApiQuery({
+    name: 'contrato-id',
+    required: true,
     description: 'Id del contrato general',
+    schema: {
+      type: 'integer',
+      format: 'int32',
+      minimum: 1,
+      maximum: CONTRATO_ID_MAXIMO,
+      example: 9001,
+    },
   })
   @ApiResponse({
     status: 201,
     description: 'Solicitud procesada correctamente',
   })
+  @ApiResponse({ status: 400, description: 'contrato-id ausente o inválido' })
   async previsualizar(
-    @Param('id') id: number,
+    @Query('contrato-id', ContratoIdPipe) contratoId: number,
     @Body() datos: DatosActaInicioDto,
   ) {
-    return await this.actaInicioService.obtenerMinuta(id, datos);
+    return await this.actaInicioService.obtenerMinuta(contratoId, datos);
   }
 
   @Post('contratos/:id')
@@ -53,14 +69,23 @@ export class ActaInicioController {
   })
   @ApiParam({
     name: 'id',
-    type: 'number',
     description: 'Id del contrato general',
+    schema: {
+      type: 'integer',
+      format: 'int32',
+      minimum: 1,
+      maximum: CONTRATO_ID_MAXIMO,
+    },
   })
   @ApiResponse({
     status: 201,
     description: 'Solicitud procesada correctamente',
   })
-  async generar(@Param('id') id: number, @Body() datos: GenerarActaInicioDto) {
+  @ApiResponse({ status: 400, description: 'id inválido o cuerpo inválido' })
+  async generar(
+    @Param('id', new ContratoIdPipe(MENSAJE_ID_RUTA_INVALIDO)) id: number,
+    @Body() datos: GenerarActaInicioDto,
+  ) {
     return await this.actaInicioService.generarActaInicio(id, datos);
   }
 

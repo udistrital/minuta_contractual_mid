@@ -161,7 +161,10 @@
             "in": "path",
             "description": "Id del contrato general",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 2147483647
             }
           }
         ],
@@ -178,6 +181,9 @@
         "responses": {
           "201": {
             "description": "Solicitud procesada correctamente"
+          },
+          "400": {
+            "description": "id inválido o cuerpo inválido"
           }
         },
         "summary": "Genera el acta de inicio: PDF (base64), registro del acta y contrato en ejecución",
@@ -186,17 +192,21 @@
         ]
       }
     },
-    "/acta-inicio/contratos/{id}/previsualizacion": {
+    "/acta-inicio/contratos/previsualizacion": {
       "post": {
         "operationId": "ActaInicioController_previsualizar",
         "parameters": [
           {
-            "name": "id",
+            "name": "contrato-id",
             "required": true,
-            "in": "path",
+            "in": "query",
             "description": "Id del contrato general",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 2147483647,
+              "example": 9001
             }
           }
         ],
@@ -213,6 +223,9 @@
         "responses": {
           "201": {
             "description": "Solicitud procesada correctamente"
+          },
+          "400": {
+            "description": "contrato-id ausente o inválido"
           }
         },
         "summary": "Vista previa del acta de inicio en PDF (base64)",
@@ -283,17 +296,21 @@
         ]
       }
     },
-    "/acta-poliza/contratos/{id}/borrador": {
+    "/acta-poliza/contratos/borrador": {
       "post": {
         "operationId": "ActaPolizaController_obtenerBorradorActaPoliza",
         "parameters": [
           {
-            "name": "id",
+            "name": "contrato-id",
             "required": true,
-            "in": "path",
+            "in": "query",
             "description": "Id del contrato general",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 2147483647,
+              "example": 9001
             }
           }
         ],
@@ -317,17 +334,11 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Borrador generado correctamente"
+          "201": {
+            "description": "Solicitud procesada; Status 200 borrador generado, 400 póliza inconsistente, 404 recurso no encontrado, 502 servicio dependiente no disponible"
           },
           "400": {
-            "description": "Póliza inconsistente"
-          },
-          "404": {
-            "description": "Recurso no encontrado"
-          },
-          "502": {
-            "description": "Servicio dependiente no disponible"
+            "description": "contrato-id ausente o inválido"
           }
         },
         "summary": "Borrador del acta de aprobación de póliza en PDF (base64), con amparos aún sin registrar",

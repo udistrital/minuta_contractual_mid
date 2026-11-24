@@ -73,15 +73,26 @@ Genera el acta de aprobación de póliza en PDF (base64) a partir de la plantill
 | Método | Ruta | Descripción |
 | --- | --- | --- |
 | GET | `/acta-poliza/contratos/:id` | Acta con la póliza y los amparos ya registrados para el contrato. |
-| POST | `/acta-poliza/contratos/:id/borrador` | Borrador con los amparos tal como están en pantalla (aún sin registrar). Body: `{ "amparos": [{ "id", "valor", "fecha_inicio", "fecha_fin" }] }`. |
+| POST | `/acta-poliza/contratos/borrador?contrato-id=<id>` | Borrador con los amparos tal como están en pantalla (aún sin registrar). Body: `{ "amparos": [{ "id", "valor", "fecha_inicio", "fecha_fin" }] }`. |
 
 Respuestas (en `Status`): `200` PDF generado, `400` póliza inconsistente (sin número, aseguradora, vigencia, expedición, amparos, o con vigencias inválidas), `404` contrato, póliza, contratista o plantilla no encontrados, `502` un servicio del que depende no respondió.
 
-**Diferencia conocida con la minuta:** el acta conserva su respuesta actual. El código HTTP no cambia con el resultado (el GET responde `200` y el POST del borrador `201`, el valor por defecto de NestJS) y el resultado va solo en `Status`, porque su consumidor en el MF revisa `Success` y se rompería con un 4xx. La minuta, en cambio, responde con el código HTTP igual a `Status`.
+**Diferencia conocida con la minuta:** el acta conserva su respuesta actual. El código HTTP no cambia con el resultado (el GET responde `200` y el POST del borrador `201`, el valor por defecto de NestJS) y el resultado va solo en `Status`, porque su consumidor en el MF revisa `Success` y se rompería con un 4xx. La única excepción es `contrato-id` ausente o inválido, que responde HTTP `400` sin generar nada. La minuta, en cambio, responde con el código HTTP igual a `Status`.
 
 Servicios que consume: `GESTION_CONTRACTUAL_CRUD` (contrato y contratista), `GESTION_CONTRACTUAL_MID` (póliza y amparos), `PROVEEDORES_MID` (datos del contratista), `PARAMETROS_CRUD` (unidad del plazo de ejecución) y `PLANTILLAS_MID` (renderizado de la plantilla a HTML y luego a PDF).
 
 El mid solo devuelve el PDF. La subida al gestor documental y el registro en `documentos-contratos` los hace el micro-frontend `gestion_contractual_mf`.
+
+### Acta de inicio
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/acta-inicio/contratos/:id` | Datos precargados del acta, campos faltantes y prerrequisitos. |
+| POST | `/acta-inicio/contratos/previsualizacion?contrato-id=<id>` | Vista previa del acta en PDF (base64), sin guardar. |
+| POST | `/acta-inicio/contratos/:id` | Genera el acta: PDF, registro del acta y contrato en ejecución. |
+| GET | `/acta-inicio/:id` | Acta registrada para el contrato y su documento. |
+
+`contrato-id` y el `:id` de la generación deben ser enteros entre 1 y 2147483647; si no, la respuesta es HTTP `400` con `{ "Success": false, "Status": 400, "Message" }` y no se ejecuta la operación. La vista previa se declara antes de `POST /acta-inicio/contratos/:id` en el controlador para que Express no la tome como un id (lo cubre `test/actas-rutas.e2e-spec.ts`).
 
 Pendientes conocidos: el catálogo de aseguradoras está fijo en el código (`TODO(#360)`) y la plantilla real en `plantillas_crud` trae una variable vacía (`{{ }}`) en "PLAZO DE EJECUCIÓN", por lo que en local se usa un mock de `plantillas_crud`.
 
