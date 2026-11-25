@@ -44,7 +44,7 @@ export class ActaPolizaController {
       'Borrador del acta de aprobación de póliza en PDF (base64), con amparos aún sin registrar',
   })
   @ApiQuery({
-    name: 'contrato-id',
+    name: 'contrato_id',
     required: true,
     description: 'Id del contrato general',
     schema: {
@@ -70,15 +70,15 @@ export class ActaPolizaController {
     },
   })
   // HTTP 201 en todos los resultados de la generación; el resultado va en Status
-  // (README). Solo contrato-id inválido responde con HTTP 400.
+  // (README). Solo contrato_id inválido responde con HTTP 400.
   @ApiResponse({
     status: 201,
     description:
       'Solicitud procesada; Status 200 borrador generado, 400 póliza inconsistente, 404 recurso no encontrado, 502 servicio dependiente no disponible',
   })
-  @ApiResponse({ status: 400, description: 'contrato-id ausente o inválido' })
+  @ApiResponse({ status: 400, description: 'contrato_id ausente o inválido' })
   async obtenerBorradorActaPoliza(
-    @Query('contrato-id', ContratoIdPipe) contratoId: number,
+    @Query('contrato_id', ContratoIdPipe) contratoId: number,
     @Body() body: { amparos?: FilaAmparoBorrador[] },
   ) {
     return await this.actaPolizaService.obtenerActaPoliza(

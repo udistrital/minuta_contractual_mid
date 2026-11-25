@@ -11,7 +11,7 @@ export const MENSAJE_ID_RUTA_INVALIDO =
 
 // Valida el id de un contrato general: entero en base 10, sin signo, espacios,
 // decimales ni notación científica o hexadecimal. Por defecto lee el parámetro
-// de consulta `contrato-id`; con `mensaje` se usa también para un id de ruta.
+// de consulta `contrato_id`; con `mensaje` se usa también para un id de ruta.
 export class ContratoIdPipe implements PipeTransform<unknown, number> {
   constructor(private readonly mensaje = MENSAJE_CONTRATO_ID_INVALIDO) {}
 
